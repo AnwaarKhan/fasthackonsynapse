@@ -4,7 +4,7 @@ Getting up and running with Synapse can sometimes be a complex undertaking. Some
 
 
 | Key Contacts | GitHub ID | Email |
-|--------------|------|-----------|-------|
+|--------------|------|-----------|
 | Samarendra Panda | @Sam-Panda | sapa@microsoft.com | 
 | Shweta Gaur | | shweta.gaur@microsoft.com | 
 | Neeraj Jhaveri | @neerajjhaveri | neeraj.jhaveri@microsoft.com | 
