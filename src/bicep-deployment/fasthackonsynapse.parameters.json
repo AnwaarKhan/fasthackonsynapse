@@ -1,0 +1,51 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "value": "fasthack" // This value must be provided.
+        },
+        "location": {
+            "value": "eastus" // This value must be provided.
+        },
+        "ipaddress": {
+            "value": "xxx.xxx.xxx.xxx" //This is your local IP address that will allow you to see into your workspace
+        },
+        "sqlAdministratorLogin": {
+          "value" : "sqladminuser"
+        },
+        "sqlAdministratorLoginPassword": {
+          "value": "Pa$$W0rd"
+        },
+        "storageAccountType":{
+          "value": "Standard_LRS"
+        },
+        "sqlpoolName":{
+          "value": "fasthacksqlpool"
+        },
+        "bigDataPoolName": {
+          "value": "etlexecuter"
+        },
+        "nodeSize":{
+          "value": "Small"
+        },
+        "sparkPoolMinNodeCount":{
+            "value": 3
+        },
+        "sparkPoolMaxNodeCount":{
+          "value": 3
+        },
+        "defaultDataLakeStorageFilesystemName":{
+          "value": "dl2"
+        },
+        "collation":{
+          "value": "SQL_Latin1_General_CP1_CI_AS"
+        },
+        "userObjectId":{
+          "value": "YOURSERVICEPRINCIPALID"
+        },
+        "dataLakeUrlFormat":{
+          "value": "https://{0}.dfs.core.windows.net"
+        }
+    }
+}
