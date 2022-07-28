@@ -2,14 +2,19 @@
 #region Login
     $SubscriptionName  = "YOUR-AZURE-SUBSCRIPTION-NAME"
     $SubscriptionID    = "YOUR-AZURE-SUBSCRIPTION-ID"
-    $Tenant            = "YOUR-TENANT-ID"
+    $TenantID          = "YOUR-TENANT-ID"
     $ServicePrincipal  = "YOUR-ServicePrincipal"
     $appID             = "YOUR-ServicePrincipal-ClientID"
     $password          = "YOUR-ServicePrincipal-CLIENTSECRET"
     $location          = "eastus"
-    $rgName            = "FastHackOnSynapse-RG"
+    $rgName            = "A-FastHackOnSynapse-RG"
     $DeploymentName    = "FastHackOnSynapse"
+    $BicepFile         = "main.bicep"
+    $parameterFile     = "fasthackonsynapse.parameters.json"
 #endregion
+
+#Login with Service Principal - Make sure you login and run deployment with a user that has a high enough RBAC to create role assignments. 
+az login --service-principal --username $appID --password $password --tenant $TenantID 
 
 #1. Create your Resource Group where you are going to land all your Synapse Resources and Dependencies
 az group create --name $rgName --location $location
@@ -19,7 +24,7 @@ az group create --name $rgName --location $location
 az bicep build --file main.bicep
 
 #3. Deploy your Bicep template to Azure 
-az deployment group create --resource-group $rgName --template-file main.bicep --parameters fasthackonsynapse.parameters.json
+az deployment group create --resource-group $rgName --template-file $BicepFile --parameters $parameterFile --verbose
 
 #4. Show a deployment within your resource group to see if everything deployed correct. (This is for debugging purposes)
 az deployment group show  -g $rgName -n 'main' --query properties.outputs.name.value
@@ -28,3 +33,7 @@ az deployment group show  -g $rgName -n 'deploy_synapse' --query properties.outp
 
 #Clean Up the Resources and Delete the Resource Group
 az group delete --name $rgName
+
+#Decompile ARM template
+az bicep decompile --file workspace.json
+az bicep decompile --file template.json

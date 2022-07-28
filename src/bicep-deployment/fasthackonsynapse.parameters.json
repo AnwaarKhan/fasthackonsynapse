@@ -8,6 +8,9 @@
         "location": {
             "value": "eastus" // This value must be provided.
         },
+        "synapseManagedResourceGroup": {
+          "value": "A-FastHackOnSynapse-Managed-RG"
+        },
         "ipaddress": {
             "value": "xxx.xxx.xxx.xxx" //This is your local IP address that will allow you to see into your workspace
         },
@@ -21,22 +24,22 @@
           "value": "Standard_LRS"
         },
         "sqlpoolName":{
-          "value": "fasthacksqlpool"
+          "value": "fhsqlpool"
         },
         "bigDataPoolName": {
-          "value": "etlexecuter"
+          "value": "fhsparkpool"
         },
         "nodeSize":{
           "value": "Small"
         },
         "sparkPoolMinNodeCount":{
-            "value": 3
+            "value": 2
         },
         "sparkPoolMaxNodeCount":{
-          "value": 3
+          "value": 2
         },
-        "defaultDataLakeStorageFilesystemName":{
-          "value": "dl2"
+        "defaultDataLakeStorageFileSystemName":{
+          "value": "landingzone"
         },
         "collation":{
           "value": "SQL_Latin1_General_CP1_CI_AS"
@@ -44,8 +47,8 @@
         "userObjectId":{
           "value": "YOURSERVICEPRINCIPALID"
         },
-        "dataLakeUrlFormat":{
-          "value": "https://{0}.dfs.core.windows.net"
+        "cmkUri": {
+          "value": "" //i.e. https://{keyvaultname}.vault.azure.net/keys/{keyname}
         }
     }
 }
