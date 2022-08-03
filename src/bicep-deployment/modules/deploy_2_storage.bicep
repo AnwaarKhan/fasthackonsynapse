@@ -1,9 +1,21 @@
-param location string = resourceGroup().location
+/*region Header
+      Module Steps 
+      1 - Deploy Storage Account
+      2 - Create your default/root folder structure
+      3 - Create a container called fasthack-synapse in the root
+      4 - Create another container called bronze in the root
+      5 - Create another container called silver in the root
+      6 - Create another container called gold in the root
+      7 - Output back to master module the following params (storageAccountKey, storageAccountCnx)
+*/
+
+//Declare Parameters------------------------------------------------------------------------------------------------------------------------
+param resourceLocation string
 
 @description('The name of the primary ADLS Gen2 Storage Account. If not provided, the workspace name will be used.')
 @minLength(3)
 @maxLength(24)
-param storageAccount string
+param storageAccountName string
 param storageAccountContainer string
 
 
@@ -15,12 +27,14 @@ param storageAccountContainer string
 ])
 param storageAccountType string = 'Standard_LRS'
 
+//Create Resources----------------------------------------------------------------------------------------------------------------------------
+
 //https://docs.microsoft.com/en-us/azure/templates/microsoft.storage/storageaccounts?tabs=bicep
 //1. Create your Storage Account (ADLS Gen2 & HNS Enabled) for your Synapse Workspace
 resource storageAccount_resource 'Microsoft.Storage/storageAccounts@2021-09-01' = {
-  name: storageAccount
+  name: storageAccountName
   kind: 'StorageV2'
-  location: location
+  location: resourceLocation
   properties:{
     isHnsEnabled: true
     minimumTlsVersion: 'TLS1_2'
@@ -109,3 +123,11 @@ resource containerGold 'Microsoft.Storage/storageAccounts/blobServices/container
     storageAccount_default
   ]
 } 
+
+
+// Taking the first key
+var key = storageAccount_resource.listKeys().keys[0].value
+
+// Using string interpolation to create a connection string and return as output
+output storageAccountKey string = key
+output storageAccountCnx string = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount_resource.name};AccountKey=${key};EndpointSuffix=core.windows.net'

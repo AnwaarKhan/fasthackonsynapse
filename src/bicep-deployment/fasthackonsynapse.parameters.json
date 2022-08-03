@@ -5,11 +5,14 @@
         "prefix": {
             "value": "fasthack" // This value must be provided.
         },
-        "location": {
+        "resourceLocation": {
             "value": "eastus" // This value must be provided.
         },
+        "storageAccountType":{
+          "value": "Standard_LRS"
+        },
         "synapseManagedResourceGroup": {
-          "value": "A-FastHackOnSynapse-Managed-RG"
+          "value": "AB-FastHackOnSynapse-Managed-RG"
         },
         "ipaddress": {
             "value": "xxx.xxx.xxx.xxx" //This is your local IP address that will allow you to see into your workspace
@@ -20,35 +23,35 @@
         "sqlAdministratorLoginPassword": {
           "value": "Pa$$W0rd"
         },
-        "storageAccountType":{
-          "value": "Standard_LRS"
+        "synapseDedicatedSQLPoolName":{
+          "value": "EnterpriseDW"
         },
-        "sqlpoolName":{
-          "value": "fhsqlpool"
-        },
-        "bigDataPoolName": {
-          "value": "fhsparkpool"
-        },
-        "nodeSize":{
-          "value": "Small"
-        },
-        "sparkPoolMinNodeCount":{
-            "value": 2
-        },
-        "sparkPoolMaxNodeCount":{
-          "value": 2
-        },
-        "defaultDataLakeStorageFileSystemName":{
-          "value": "landingzone"
+        "synapseSQLPoolSKU":{
+          "value": "DW100c"
         },
         "collation":{
           "value": "SQL_Latin1_General_CP1_CI_AS"
         },
-        "userObjectId":{
-          "value": "YOURSERVICEPRINCIPALID"
+        "synapseSparkPoolName": {
+          "value": "SparkPool"
+        },
+        "synapseSparkPoolNodeSize":{
+          "value": "Small"
+        },
+        "synapseSparkPoolMinNodeCount":{
+            "value": 3
+        },
+        "synapseSparkPoolMaxNodeCount":{
+          "value": 3
         },
         "cmkUri": {
           "value": "" //i.e. https://{keyvaultname}.vault.azure.net/keys/{keyname}
+        },
+        "spObjectId":{
+          "value": "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxx" //This is either a Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role to deploy the solution)
+        },
+        "userObjectId":{
+          "value": "xxxxx-xxxx-xxxx-xxx-xxxxxxxxxxx" //This is my b3359b94-5c98-440a-bad6-d4e69512b0fc user object id //This is either a Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role to deploy the solution)
         }
     }
 }
