@@ -1,0 +1,57 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "value": "fasthack" // This value must be provided.
+        },
+        "resourceLocation": {
+            "value": "eastus" // This value must be provided.
+        },
+        "storageAccountType":{
+          "value": "Standard_LRS"
+        },
+        "synapseManagedResourceGroup": {
+          "value": "A-FastHackOnSynapse-Managed-RG"
+        },
+        "ipaddress": {
+            "value": "98.254.110.64" //This is your local IP address that will allow you to see into your workspace
+        },
+        "sqlAdministratorLogin": {
+          "value" : "sqladminuser"
+        },
+        "sqlAdministratorLoginPassword": {
+          "value": "Pa$$W0rd"
+        },
+        "synapseDedicatedSQLPoolName":{
+          "value": "EnterpriseDW"
+        },
+        "synapseSQLPoolSKU":{
+          "value": "DW100c"
+        },
+        "collation":{
+          "value": "SQL_Latin1_General_CP1_CI_AS"
+        },
+        "synapseSparkPoolName": {
+          "value": "SparkPool"
+        },
+        "synapseSparkPoolNodeSize":{
+          "value": "Small"
+        },
+        "synapseSparkPoolMinNodeCount":{
+            "value": 3
+        },
+        "synapseSparkPoolMaxNodeCount":{
+          "value": 3
+        },
+        "cmkUri": {
+          "value": "" //i.e. https://{keyvaultname}.vault.azure.net/keys/{keyname}
+        },
+        "spObjectId":{
+          "value": "5ebaca28-0acb-4686-8a42-c826cd352e4c" //This is either a Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role to deploy the solution)
+        },
+        "userObjectId":{
+          "value": "b3359b94-5c98-440a-bad6-d4e69512b0fc" //This is my b3359b94-5c98-440a-bad6-d4e69512b0fc user object id //This is either a Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role to deploy the solution)
+        }
+    }
+}

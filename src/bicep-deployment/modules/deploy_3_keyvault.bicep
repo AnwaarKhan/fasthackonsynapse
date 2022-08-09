@@ -12,10 +12,11 @@ param deploymentScriptUAMIName string
 
 param spObjectId string
 param userObjectId string
+@secure()
 param storageAccountKey string 
 param storageAccountCnx string
 
-var vaultUri = toLower('https://${keyVaultName}.vault.azure.net/')
+//var vaultUri = toLower('https://${keyVaultName}.vault.azure.net/')
 
 //Create Resources----------------------------------------------------------------------------------------------------------------------------
 
@@ -87,28 +88,13 @@ resource r_keyVault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
           ]
         }
       }
-      // {
-      //   tenantId: subscription().tenantId
-      //   objectId: 'xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx' //Place your Security Object ID right here to give your User a Key Vault Access Policy
-      //   permissions: {
-      //     secrets: [
-      //       'get'
-      //       'list'
-      //       'set'
-      //       'delete'
-      //       'recover'
-      //       'backup'
-      //       'restore'
-      //     ]
-      //   }
-      // }
     ]
     enabledForDeployment: true
     enabledForDiskEncryption: true
     //enableSoftDelete: true
     enabledForTemplateDeployment: true
     enableRbacAuthorization: false
-    vaultUri: vaultUri
+    //vaultUri: vaultUri
     provisioningState: 'Succeeded'
     publicNetworkAccess: 'Enabled'
   }

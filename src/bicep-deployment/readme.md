@@ -1,5 +1,6 @@
-## <img src ='https://airsblobstorage.blob.core.windows.net/airstream/bicep.png' alt="FTA Fast Hack Bicep Deployment" width="50px" style="float: left; margin-right:10px;"> FTA Fast Hack - Bicep Deployment (Azure Synapse Analytics workspace)
+![Synapse FastHack CI/CD](/Assets/images/synapsecicd.png)
 
+## <img src ='https://airsblobstorage.blob.core.windows.net/airstream/bicep.png' alt="Fast Hack Bicep Deployment" width="50px" style="float: left; margin-right:10px;"> Bicep Deployment (Azure Synapse Analytics workspace)
 
 ### Preparation
 1. Install az cli  

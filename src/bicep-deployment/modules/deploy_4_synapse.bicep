@@ -7,7 +7,6 @@
       5 - Create your Dedicated Apache Spark Pool
       6 - Create your Dedicated ADX Kusto Pool
       7 - Grant/Set Synapse MSI as SQL Admin
-      8 - Create and apply RBAC
 */
 
 //Declare Parameters--------------------------------------------------------------------------------------------------------------------------
@@ -42,13 +41,7 @@ param createManagedPrivateEndpoint bool = false
 param startIpaddress string
 param endIpAddress string
 
-//Paramaters for Role Assignments 
-param userObjectId string
 var defaultDataLakeStorageAccountUrl = 'https://${defaultDataLakeStorageAccountName}.dfs.core.windows.net'
-var storageBlobDataContributorRoleID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe' //This is the roleDefinitionId for the Storage Blob Data Contributor. See here: https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
-// var storageRoleUniqueId     = guid(resourceId('Microsoft.Storage/storageAccounts', synapseWorkspaceName), defaultDataLakeStorageAccountName)
-// var storageRoleUserUniqueId = guid(resourceId('Microsoft.Storage/storageAccounts', synapseWorkspaceName), userObjectId)
-param uamiPrincipalID string
 
 //Paramaters for SQL Pools
 param synapseDedicatedSQLPoolName string
@@ -91,10 +84,23 @@ resource r_synapseWorkspace 'Microsoft.Synapse/workspaces@2021-06-01' = {
     sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
      //publicNetworkAccess: Post Deployment Script will disable public network access for vNet integrated deployments.
      managedVirtualNetwork: (networkIsolationMode == 'vNet') ? 'default' : ''
-     managedVirtualNetworkSettings: (networkIsolationMode == 'vNet')? {
-       preventDataExfiltration:true
-     }: null
-
+     managedVirtualNetworkSettings: (networkIsolationMode == 'vNet') ? {
+       preventDataExfiltration: true
+     }: {
+      preventDataExfiltration: false
+      allowedAadTenantIdsForLinking: []
+    }
+    // connectivityEndpoints: {
+    //   web: 'https://web.azuresynapse.net?workspace=%2fsubscriptions%2f831a353b-37df-42bb-b4da-cfec630a5cfe%2fresourceGroups%2fA-Synapse-End2End%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2f${workspaces_airmanavnet_name}'
+    //   dev: 'https://${workspaces_airmanavnet_name}.dev.azuresynapse.net'
+    //   sqlOnDemand: '${workspaces_airmanavnet_name}-ondemand.sql.azuresynapse.net'
+    //   sql: '${workspaces_airmanavnet_name}.sql.azuresynapse.net'
+    // }
+    // cspWorkspaceAdminProperties: {
+    //   initialWorkspaceAdminObjectId: 'b3359b94-5c98-440a-bad6-d4e69512b0fc'
+    // }
+    azureADOnlyAuthentication: false
+    publicNetworkAccess: 'Enabled'
     trustedServiceBypassEnabled: true
     workspaceRepositoryConfiguration: {
       accountName: 'APOps'
@@ -105,6 +111,24 @@ resource r_synapseWorkspace 'Microsoft.Synapse/workspaces@2021-06-01' = {
       rootFolder: '/'
       tenantId: environment().authentication.tenant
       type: 'WorkspaceVSTSConfiguration' //This can either be WorkspaceVSTSConfiguration or WorkspaceGitHubConfiguration
+    }
+  }
+}
+
+resource workspaces_AutoResolveIntegrationRuntime 'Microsoft.Synapse/workspaces/integrationruntimes@2021-06-01' = {
+  parent: r_synapseWorkspace
+  name: 'AutoResolveIntegrationRuntime'
+  properties: {
+    type: 'Managed'
+    typeProperties: {
+      computeProperties: {
+        location: 'AutoResolve'
+      }
+    }
+    managedVirtualNetwork: {
+      referenceName: 'default'
+      type: 'ManagedVirtualNetworkReference'
+      id: '6943c986-3df1-4bf9-98af-636fb351f46c'
     }
   }
 }
@@ -229,127 +253,10 @@ resource r_managedIdentitySqlControlSettings 'Microsoft.Synapse/workspaces/manag
   }
 }
 
-//https://docs.microsoft.com/en-us/azure/templates/microsoft.authorization/roleassignments
-//https://docs.microsoft.com/en-us/azure/synapse-analytics/security/how-to-grant-workspace-managed-identity-permissions
-//8.A Create and apply RBAC to your synapse managed identity to the synapse adls storage account -Synapse Workspace Role Assignment as Blob Data Contributor Role in the Data Lake Storage Account
-resource r_storageAccount  'Microsoft.Storage/storageAccounts@2021-09-01' existing = {
-  name: defaultDataLakeStorageAccountName
-}
-
-resource r_dataLakeRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
-  name: guid(r_synapseWorkspace.name, defaultDataLakeStorageAccountName)
-  scope: r_storageAccount     
-  properties:{
-    principalId: r_synapseWorkspace.identity.principalId
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributorRoleID)
-  }
-}
-
-// resource r_dataLakeRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
-//   name: storageRoleUniqueId
-//   scope: resourceGroup()       
-//   properties:{
-//     principalId: r_synapseWorkspace.identity.principalId
-//     principalType: 'ServicePrincipal'
-//     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributorRoleID)
-//   }
-// }
-
-//------------------------------------------------------------------this is causing issues------------------------------------------------------
-//8.B Apply RBAC role to your User or Service Principal
-// resource userroleassing 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
-//   name: guid(r_synapseWorkspace.name, userObjectId)
-//   scope: r_storageAccount 
-//   properties:{
-//     principalId: userObjectId
-//     principalType: 'User'
-//     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributorRoleID)
-//   }
-// }
 
 
-resource r_uami_workspace_admin 'Microsoft.Synapse/workspaces/administrators@2021-06-01' = {
-  name: 'activeDirectory'
-  parent: r_synapseWorkspace
-  properties: {
-    administratorType: 'ActiveDirectory'
-    sid: uamiPrincipalID
-    tenantId: subscription().tenantId
-  }
-}
-
-// resource azureIR_1 'Microsoft.Synapse/workspaces/integrationRuntimes@2021-06-01' = {
-//   name: 'AzureIR1'
-//   parent: synapse
-//   properties: {
-//     description: 'string'
-//     type: 'string'
-//     // For remaining properties, see IntegrationRuntime objects
-//   }
-// }
-
-// param storageAccountKey string
-// param akvuri string
-
-// resource LS_AKV 'Microsoft.DataFactory/factories/linkedservices@2018-06-01' = {
-//   name: 'LS_AKV'
-//   parent: synapse
-//   properties: {
-//     connectVia: {
-//       parameters: {}
-//       referenceName: 'AutoResolveIntegrationRuntime'
-//       type: 'IntegrationRuntimeReference'
-//     }
-//     type: 'AzureKeyVault'
-//     typeProperties: {
-//     baseUrl: akvuri //${prefix}-keyvault-${randomstring} "baseUrl": "https://opnhckdaakv.vault.azure.net/"
-//     credential: {
-//       referenceName: 'string'
-//       type: 'CredentialReference'
-//     }
-//   }
-//   }
-// }
 
 
-// resource LS_ADLS_G2 'Microsoft.DataFactory/factories/linkedservices@2018-06-01' = {
-//   name: 'string'
-//   parent: synapse
-//   properties: {
-//     connectVia: {
-//       referenceName: 'AutoResolveIntegrationRuntime'
-//       type: 'IntegrationRuntimeReference' 
-//     }
-//     type: 'AzureBlobFS'
-//     // For remaining properties, see LinkedService objects
-//     typeProperties: {
-//       accountKey: any(storageAccountKey)
-//       azureCloudType: any('AzurePublic')
-//       credential: {
-//         referenceName: 'string'
-//         type: 'CredentialReference'
-//       }
-//       //encryptedCredential: any()
-//       servicePrincipalCredential: {
-//         type: 'string'
-//         // For remaining properties, see SecretBase objects
-//       }
-//       // servicePrincipalCredentialType: any()
-//       // servicePrincipalId: any()
-//       // servicePrincipalKey: {
-//       //   type: 'string'
-//       //   // For remaining properties, see SecretBase objects
-//       // }
-//       tenant: subscription().tenantId
-//       url: any(defaultDataLakeStorageAccountUrl)//any('https://opnhckadlstorage.dfs.core.windows.net')
-//     }
-//   }
-// }
-
-
-//output workspaceDataLakeAccountID string = r_workspaceDataLakeAccount.id
-//output workspaceDataLakeAccountName string = r_workspaceDataLakeAccount.name
 output synapseWorkspaceID string = r_synapseWorkspace.id
 output synapseWorkspaceName string = r_synapseWorkspace.name
 

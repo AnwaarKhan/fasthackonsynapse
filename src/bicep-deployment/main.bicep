@@ -21,14 +21,14 @@
 // Workload Deployment Control Parameters
 //********************************************************
 param ctrlDeployStreaming bool = false        //Controls the deployment of EventHubs and Stream Analytics
-param ctrlDeployOperationalDB bool = false   //Controls the creation of operational Azure database data sources
-param ctrlDeployCosmosDB bool = false        //Controls the creation of CosmosDB if (ctrlDeployOperationalDBs == true)
-param ctrlDeploySampleArtifacts bool = false //Controls the creation of sample artifcats (SQL Scripts, Notebooks, Linked Services, Datasets, Dataflows, Pipelines) based on chosen template.
+param ctrlDeployOperationalDB bool = false    //Controls the creation of operational Azure database data sources
+param ctrlDeployCosmosDB bool = false         //Controls the creation of CosmosDB if (ctrlDeployOperationalDBs == true)
+param ctrlDeployArtifacts bool = true         //Controls the creation of sample artifcats (SQL Scripts, Notebooks, Linked Services, Datasets, Dataflows, Pipelines) based on chosen template.
 
-param ctrlDeployPurview bool = true          //Controls the deployment of Azure Purview
-param ctrlDeployAI bool = true               //Controls the deployment of Azure ML and Cognitive Services
-param ctrlDeployDataShare bool = true        //Controls the deployment of Azure Data Share
-param ctrlDeployPrivateDNSZones bool = true  //Controls the creation of private DNS zones for private links
+param ctrlDeployPurview bool = false          //Controls the deployment of Azure Purview
+param ctrlDeployAI bool = false               //Controls the deployment of Azure ML and Cognitive Services
+param ctrlDeployDataShare bool = false        //Controls the deployment of Azure Data Share
+param ctrlDeployPrivateDNSZones bool = false  //Controls the creation of private DNS zones for private links
 
 //********************************************************
 // Global Parameters
@@ -56,7 +56,7 @@ param ctrlNewOrExistingVNet string = 'new'
   'vNet'
 ])
 @description('Network Isolation Mode')
-param networkIsolationMode string = 'vNet'
+param networkIsolationMode string = 'default'
 
 @allowed([
   'eventhub'
@@ -267,10 +267,6 @@ module m_synapse 'modules/deploy_4_synapse.bicep' = {
     startIpaddress: ipaddress
     endIpAddress: ipaddress
 
-    //Send in your User Object ID
-    userObjectId: userObjectId
-    uamiPrincipalID: m_keyvault.outputs.deploymentScriptUAMIPrincipalID
-
     //Send in SQL Pool Parameters
     sqlAdministratorLogin: sqlAdministratorLogin
     sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
@@ -313,7 +309,7 @@ module m_KeyVaultSynapseAccessPolicy 'modules/deploy_5_keyvaultsynapseaccesspoli
 //********************************************************
 
 //Deploy Event Hub
-module m_eventhub 'modules/deploy_7_eventhub.bicep' = if(ctrlDeployStreaming == true) {
+module m_eventhub 'modules/deploy_6_eventhub.bicep' = if(ctrlDeployStreaming) {
   name: 'deploy_eventhub'
   params: {
     resourceLocation: resourceLocation
@@ -321,7 +317,7 @@ module m_eventhub 'modules/deploy_7_eventhub.bicep' = if(ctrlDeployStreaming == 
   }
 }
 
-module m_streaminganalytics 'modules/deploy_8_streaminganalytics.bicep' = if(ctrlDeployStreaming == true) {
+module m_streaminganalytics 'modules/deploy_7_streaminganalytics.bicep' = if(ctrlDeployStreaming) {
   name: 'deploy_streaminganalytics'
   params: {
     resourceLocation: resourceLocation
@@ -336,7 +332,7 @@ module m_streaminganalytics 'modules/deploy_8_streaminganalytics.bicep' = if(ctr
 // COSMOS DB DEPLOY
 //********************************************************
 
-module m_cosmosdb 'modules/deploy_9_cosmosdb.bicep' = if(ctrlDeployOperationalDB) {
+module m_cosmosdb 'modules/deploy_8_cosmosdb.bicep' = if(ctrlDeployOperationalDB) {
   name: 'deploy_cosmosdb'
   params: {
     resourceLocation: resourceLocation
@@ -370,4 +366,25 @@ module m_RBACRoleAssignment 'modules/deploy_10_RBAC.bicep' = {
     UAMIPrincipalID: m_keyvault.outputs.deploymentScriptUAMIPrincipalID
    
   }
+}
+
+//********************************************************
+// Post Deployment Scripts
+//********************************************************
+
+resource r_deploymentScriptUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
+  name: deploymentScriptUAMIName
+}
+
+module m_artifacts 'modules/deploy_11_SynapseArtifacts.bicep' = if(ctrlDeployArtifacts) {
+  name: 'deploy_artifacts'
+  params: {
+    dataLakeAccountName: storageAccountName
+    synapseWorkspaceName: m_synapse.outputs.synapseWorkspaceName
+    synapseWorkspaceIdentityPrincipalID: m_synapse.outputs.synapseWorkspaceIdentityPrincipalID
+    UAMIPrincipalID: m_keyvault.outputs.deploymentScriptUAMIPrincipalID
+  }
+  dependsOn:[
+    m_synapse
+  ]
 }
