@@ -17,12 +17,12 @@ variables:
   # IaC
   baseName: $(prefix)$(postfix)$(environment)
   resourceGroupName: AP4-$(baseName)-RG
-  storageAccountName: $(prefix)st$(postfix)$(env)
-  dataLakeAccountName: $(prefix)adl$(postfix)$(env)
-  sqlServerName: $(prefix)-sql-$(postfix)-$(env)
+  storageAccountName: $(prefix)st$(postfix)$(environment)
+  dataLakeAccountName: $(prefix)adl$(postfix)$(environment)
+  sqlServerName: $(prefix)-sql-$(postfix)-$(environment)
   databaseName: sampledb
-  synapseWorkspace: $(prefix)-synapse-$(postfix)-$(env)
-  synapsedatalakegen2name: $(prefix)adlssyn$(postfix)$(env)
-  keyVaultName: $(prefix)-akv-$(postfix)-$(env)
+  synapseWorkspace: $(prefix)-synapse-$(postfix)-$(environment)
+  synapsedatalakegen2name: $(prefix)adlssyn$(postfix)$(environment)
+  keyVaultName: $(prefix)-akv-$(postfix)-$(environment)
 
 
