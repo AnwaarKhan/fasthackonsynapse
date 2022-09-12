@@ -37,7 +37,7 @@ Here are the Azure resources that are going to be deployed using the devops pipe
   ** gihub_repo_name: the repo where you have forked the #1 repo. Example"Org-Name/Repo-Name"
   ** (gihub_repo_name property is required if you are using workpsace_publish branch to publish the synapse artifacts ( pipeline,datasets etc), otherwise it is not required.)
 
-3. Go to the Azure DevOps and map the yml file from the repo ( If you are using the workspace_publish branch, uncomment from line 23 to line 29 in ado-deploy-infra.yml pipeline)
+3. Go to the Azure DevOps and map the yml file from the repo (If you are using the workspace_publish branch, uncomment from line 23 to line 29 in ado-deploy-infra.yml pipeline. If you are cloning the repo as is, then leave this value blank)
    ![yml_pipeline](.images/yml_pipeline.jpg)
 4. Save and Run. It would be prompting for the SQL Server password and provide the password. 
 5.  4 stages are going to executed.  

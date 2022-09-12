@@ -18,7 +18,7 @@ trigger:
 pool:
   vmImage: $(ap_vm_image)
 
-# Incase you are using the workspace publish branch.
+# (If you are using the workspace_publish branch, uncomment from line 23 to line 29 in ado-deploy-infra.yml pipeline. If you are cloning the repo as is, then leave this value blank)
 
 # resources:
 #   repositories:
@@ -73,20 +73,20 @@ stages :
           deploy:
             steps:
             - checkout: self
-            # - task: AzureCLI@2
-            #   displayName: Running Dev Deployment
-            #   inputs:
-            #     azureSubscription: $(ado_service_connection_rg)
-            #     scriptType: bash
-            #     scriptLocation: inlineScript
-            #     inlineScript: |
-            #       az --version
-            #       echo "deploying bicep..."
-            #       az deployment sub create \
-            #         --name $(Build.DefinitionName) \
-            #         --location $(location) \
-            #         --template-file ./src/bicep-deployment/Pattern4/infrastructure/main.bicep \
-            #         --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=$(objectID) sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }}
+            - task: AzureCLI@2
+              displayName: Running Dev Deployment
+              inputs:
+                azureSubscription: $(ado_service_connection_rg)
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: |
+                  az --version
+                  echo "deploying bicep..."
+                  az deployment sub create \
+                    --name $(Build.DefinitionName) \
+                    --location $(location) \
+                    --template-file ./src/bicep-deployment/Pattern4/infrastructure/main.bicep \
+                    --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=$(objectID) sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }}
 
             - task: AzurePowerShell@5
               displayName: 'Azure PowerShell script: Deploy SQL Metadata'
