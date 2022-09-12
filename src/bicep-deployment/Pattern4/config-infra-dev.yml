@@ -19,7 +19,7 @@ variables:
   resourceGroupName: AP4-$(baseName)-RG
   storageAccountName: $(prefix)st$(postfix)$(env)
   dataLakeAccountName: $(prefix)adl$(postfix)$(env)
-  sqlServerName: $(prefix)sql$(postfix)$(env)
+  sqlServerName: $(prefix)-sql-$(postfix)-$(env)
   databaseName: sampledb
   synapseWorkspace: $(prefix)-synapse-$(postfix)-$(env)
   synapsedatalakegen2name: $(prefix)adlssyn$(postfix)$(env)
