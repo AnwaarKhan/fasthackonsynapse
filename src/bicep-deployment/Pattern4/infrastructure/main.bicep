@@ -36,7 +36,7 @@ var synapseWorkSpaceName = '${prefix}-synapse-${postfix}-${env}'
 var dataLakeg2SynapseName = '${prefix}adlssyn${postfix}${env}'
 var storageAccountName = '${prefix}st${postfix}${env}'
 var datalakeName = '${prefix}adl${postfix}${env}'
-var keyVaultName = '${prefix}akv${postfix}${env}'
+var keyVaultName = '${prefix}-akv-${postfix}-${env}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2020-06-01' = {
   name: resourceGroupName
