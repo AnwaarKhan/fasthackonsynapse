@@ -18,13 +18,15 @@ trigger:
 pool:
   vmImage: $(ap_vm_image)
 
-resources:
-  repositories:
-  - repository: "fta-Catalytics-workspace-publish"
-    type: github
-    name: $(gihub_repo_name)
-    ref: workspace_publish
-    endpoint: Azure   #provide the service connection name that connects to the github repo.
+# Incase you are using the workspace publish branch.
+
+# resources:
+#   repositories:
+#   - repository: "fta-Catalytics-workspace-publish"
+#     type: github
+#     name: $(gihub_repo_name)
+#     ref: workspace_publish
+#     endpoint: Azure   #provide the service connection name that connects to the github repo.
 
 stages :
   - stage: Lint
@@ -125,12 +127,13 @@ stages :
     - job: _job_SynapseArtifactsDeployment
       displayName: synapse artifacts deployment
       steps:
-      - checkout: fta-Catalytics-workspace-publish
+      #- checkout: fta-Catalytics-workspace-publish
+      - checkout: self
       - task: AzureSynapseWorkspace.synapsecicd-deploy.synapse-deploy.Synapse workspace deployment@1
         displayName: 'Synapse deployment task for workspace: synwfasthackpt1dev'
         inputs:
-          TemplateFile: '$(System.DefaultWorkingDirectory)/synwfasthackpt1/TemplateForWorkspace.json'
-          ParametersFile: '$(System.DefaultWorkingDirectory)/synwfasthackpt1/TemplateParametersForWorkspace.json'
+          TemplateFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern4/src/workspace_publish_pattern_4/TemplateForWorkspace.json'
+          ParametersFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern4/src/workspace_publish_pattern_4/TemplateParametersForWorkspace.json'
           azureSubscription: 'Azure-ARM-Dev-SAPA'
           ResourceGroupName: $(resourceGroupName)
           TargetWorkspaceName: $(synapseWorkspace)
