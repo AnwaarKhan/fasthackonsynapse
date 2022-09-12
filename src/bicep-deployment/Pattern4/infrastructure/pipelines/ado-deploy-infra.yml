@@ -37,7 +37,7 @@ stages :
       steps:
         - checkout: self
         - script: |
-            az bicep build --file ./infrastructure/main.bicep
+            az bicep build --file ./src/bicep-deployment/Pattern4/infrastructure/main.bicep
           name: LintBicepCode
           displayName: Run Bicep Linter
 
@@ -56,7 +56,7 @@ stages :
             inlineScript: |
               az deployment sub validate \
                 --name $(Build.DefinitionName) \
-                --template-file ./infrastructure/main.bicep \
+                --template-file ./src/bicep-deployment/Pattern4/infrastructure/main.bicep \
                 --location $(location) \
                 --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=$(objectID) sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }}
 
@@ -85,7 +85,7 @@ stages :
                   az deployment sub create \
                     --name $(Build.DefinitionName) \
                     --location $(location) \
-                    --template-file ./infrastructure/main.bicep \
+                    --template-file ./src/bicep-deployment/Pattern4/infrastructure/main.bicep \
                     --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=$(objectID) sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }}
 
             - task: AzurePowerShell@5
@@ -96,7 +96,7 @@ stages :
                 Inline: |
                     $keyVaultname="$(keyVaultName)"
                     $keyVaultSecretnameSqlConnString="sqlconn-sampledb"
-                    $scriptPath="$(System.DefaultWorkingDirectory)/src/sql_scripts/PostDeployment/create_metadata_tables.sql"
+                    $scriptPath="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern4/src/sql_scripts/PostDeployment/create_metadata_tables.sql"
                     # Installing the SQLServer Module
                     
                     if (!(Get-Module -Name SQLServer)){
