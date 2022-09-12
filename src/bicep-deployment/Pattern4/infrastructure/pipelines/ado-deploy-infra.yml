@@ -73,20 +73,20 @@ stages :
           deploy:
             steps:
             - checkout: self
-            - task: AzureCLI@2
-              displayName: Running Dev Deployment
-              inputs:
-                azureSubscription: $(ado_service_connection_rg)
-                scriptType: bash
-                scriptLocation: inlineScript
-                inlineScript: |
-                  az --version
-                  echo "deploying bicep..."
-                  az deployment sub create \
-                    --name $(Build.DefinitionName) \
-                    --location $(location) \
-                    --template-file ./src/bicep-deployment/Pattern4/infrastructure/main.bicep \
-                    --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=$(objectID) sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }}
+            # - task: AzureCLI@2
+            #   displayName: Running Dev Deployment
+            #   inputs:
+            #     azureSubscription: $(ado_service_connection_rg)
+            #     scriptType: bash
+            #     scriptLocation: inlineScript
+            #     inlineScript: |
+            #       az --version
+            #       echo "deploying bicep..."
+            #       az deployment sub create \
+            #         --name $(Build.DefinitionName) \
+            #         --location $(location) \
+            #         --template-file ./src/bicep-deployment/Pattern4/infrastructure/main.bicep \
+            #         --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=$(objectID) sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }}
 
             - task: AzurePowerShell@5
               displayName: 'Azure PowerShell script: Deploy SQL Metadata'
@@ -112,6 +112,7 @@ stages :
                     
                     
                     # Get the secret of the sql server Module
+                    Write-Output $keyVaultName
                     Write-Output "Fetching the key vault secret"
                     $sqldbConnString = Get-AzKeyVaultSecret -VaultName $keyVaultname -Name $keyVaultSecretnameSqlConnString -AsPlainText
                     
