@@ -12,14 +12,14 @@ variables:
   # Azure DevOps 
   ado_service_connection_rg: Azure-ARM-Dev-SAPA
   # github
-  gihub_repo_name: "Azure/fasthackonsynapse"
+  gihub_repo_name: "Azure/fasthackonsynapse" #Not required if you are not using workspace_publish branch for Azure synapse
 
   # IaC
   baseName: $(prefix)$(postfix)$(environment)
-  resourceGroupName: 'AP4-$(baseName)-RG'
+  resourceGroupName: AP4-$(baseName)-RG
   storageAccountName: $(prefix)st$(postfix)$(env)
-  dataLakeAccountName: $(prefix)adl$(postfix)$(env)'
-  sqlServerName: $(prefix)-sql-$(postfix)-$(env)'
+  dataLakeAccountName: $(prefix)adl$(postfix)$(env)
+  sqlServerName: $(prefix)sql$(postfix)$(env)
   databaseName: sampledb
   synapseWorkspace: $(prefix)-synapse-$(postfix)-$(env)
   synapsedatalakegen2name: $(prefix)adlssyn$(postfix)$(env)
