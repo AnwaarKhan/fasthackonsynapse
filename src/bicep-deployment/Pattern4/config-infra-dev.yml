@@ -11,8 +11,7 @@ variables:
 
   # Azure DevOps 
   ado_service_connection_rg: Azure-ARM-Dev-SAPA
-  # github
-  gihub_repo_name: "Azure/fasthackonsynapse" #Not required if you are not using workspace_publish branch for Azure synapse
+
 
   # IaC
   baseName: $(prefix)$(postfix)$(environment)
