@@ -18,15 +18,6 @@ trigger:
 pool:
   vmImage: $(ap_vm_image)
 
-# (If you are using the workspace_publish branch, uncomment from line 23 to line 29 in ado-deploy-infra.yml pipeline. If you are cloning the repo as is, then leave this value blank)
-
-# resources:
-#   repositories:
-#   - repository: "fta-Catalytics-workspace-publish"
-#     type: github
-#     name: $(gihub_repo_name)
-#     ref: workspace_publish
-#     endpoint: Azure   #provide the service connection name that connects to the github repo.
 
 stages :
   - stage: Lint
@@ -128,7 +119,6 @@ stages :
     - job: _job_SynapseArtifactsDeployment
       displayName: synapse artifacts deployment
       steps:
-      #- checkout: fta-Catalytics-workspace-publish
       - checkout: self
       - task: AzureSynapseWorkspace.synapsecicd-deploy.synapse-deploy.Synapse workspace deployment@1
         displayName: 'Synapse deployment task for workspace: synwfasthackpt1dev'
