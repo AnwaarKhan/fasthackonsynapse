@@ -12,16 +12,16 @@
           "value": "Standard_LRS"
         },
         "synapseManagedResourceGroup": {
-          "value": "AB-FastHackOnSynapse-Managed-RG"
+          "value": "P2-FastHackOnSynapse-Managed-RG"
         },
         "ipaddress": {
-            "value": "xxx.xxx.xxx.xxx" //This is your local IP address that will allow you to see into your workspace
+            "value": "xx.xxx.xxx.xx" //This is your local IP address that will allow you to see into your workspace
         },
         "sqlAdministratorLogin": {
           "value" : "sqladminuser"
         },
         "sqlAdministratorLoginPassword": {
-          "value": "Pa$$W0rd"
+          "value": "Xx$$x0xx"
         },
         "synapseDedicatedSQLPoolName":{
           "value": "EnterpriseDW"
@@ -48,10 +48,7 @@
           "value": "" //i.e. https://{keyvaultname}.vault.azure.net/keys/{keyname}
         },
         "spObjectId":{
-          "value": "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxx" //This is either a Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role to deploy the solution)
-        },
-        "userObjectId":{
-          "value": "xxxxx-xxxx-xxxx-xxx-xxxxxxxxxxx" //This is my b3359b94-5c98-440a-bad6-d4e69512b0fc user object id //This is either a Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role to deploy the solution)
+          "value": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" //Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role to deploy the solution)
         }
     }
 }

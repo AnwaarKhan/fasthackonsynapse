@@ -1,34 +1,38 @@
 /*region Header
       =========================================================================================================
-      Created by:       Author: Your Name | your.name@microsoft.com 
-      Created on:       7/28/2022
+      Created by:       Author: Your Name | your.name@azurestream.io 
+      Created on:       9/13/2022
+      Description:      Pattern 2
       =========================================================================================================
 
       Dependencies:
         Install Azure CLI
         https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=azure-cli-latest 
 
+        Install Latest version of Bicep
+        https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/install
+
       SCRIPT STEPS 
-      1 - Create Managed VNet
+      1 - Create Managed VNet - (FOR PATTERN 1 WE WILL NOT DEPLOY A VNET - WE WILL LEAVE IT SIMPLE AND JUST OPEN UP SYNAPSE WORKSPACE TO PUBLIC ACCESS)
       2 - Create Storage Accounts
-      3 - Create Key Vault
-      4 - Create Synapse Workspace
-      5 - Create Synapse Workspace ADF Assets (Integration Runtimes, Linkd Services, Datasets, Pipelines, Notebooks, Triggers, etc. )
-      6 - Create Event Hub
+      3 - Create Azure SQL Server and DB
+      4 - Create Key Vault
+      5 - Create Synapse Workspace
+      5 - Create Synapse Access Policy to get into Key Vault
+      6 - Apply necessary RBAC
+      7 - Create Synapse Workspace Assets (Linkd Services, Datasets, Pipelines, Notebooks, Triggers, etc. )
+      8 - Create Event Hub
+      9 - Create Streaming Analytics
 */
+
+//targetScope = 'subscription'
 
 //********************************************************
 // Workload Deployment Control Parameters
 //********************************************************
-param ctrlDeployStreaming bool = false        //Controls the deployment of EventHubs and Stream Analytics
-param ctrlDeployOperationalDB bool = false    //Controls the creation of operational Azure database data sources
-param ctrlDeployCosmosDB bool = false         //Controls the creation of CosmosDB if (ctrlDeployOperationalDBs == true)
-param ctrlDeployArtifacts bool = true         //Controls the creation of sample artifcats (SQL Scripts, Notebooks, Linked Services, Datasets, Dataflows, Pipelines) based on chosen template.
-
-param ctrlDeployPurview bool = false          //Controls the deployment of Azure Purview
-param ctrlDeployAI bool = false               //Controls the deployment of Azure ML and Cognitive Services
-param ctrlDeployDataShare bool = false        //Controls the deployment of Azure Data Share
-param ctrlDeployPrivateDNSZones bool = false  //Controls the creation of private DNS zones for private links
+param ctrlDeployStreaming bool = false               //Controls the deployment of EventHubs and Stream Analytics
+param ctrlDeployOperationalDB bool = false           //Controls the creation of operational Azure database data sources
+param ctrlDeploySampleArtifacts bool = false         //Controls the creation of sample artifcats (SQL Scripts, Notebooks, Linked Services, Datasets, Dataflows, Pipelines) based on chosen template.
 
 //********************************************************
 // Global Parameters
@@ -52,6 +56,11 @@ param resourceLocation string = resourceGroup().location
 param ctrlNewOrExistingVNet string = 'new'
 
 @allowed([
+  'OpenDatasets'
+])
+param sampleArtifactCollectionName string = 'OpenDatasets'
+
+@allowed([
   'default'
   'vNet'
 ])
@@ -64,6 +73,15 @@ param networkIsolationMode string = 'default'
 ])
 param ctrlStreamIngestionService string = 'eventhub'
 
+param env string = 'Dev'
+
+param tags object = {
+  Owner: 'fasthack'
+  Project: 'fasthack'
+  Environment: env
+  Toolkit: 'bicep'
+  Name: prefix
+}
 
 //********************************************************
 // Resource Config Parameters
@@ -100,9 +118,6 @@ param keyVaultName string = '${prefix}-keyvault-${uniqueSuffix}'
 @description('Your Service Principal Object ID')
 param spObjectId string //This is your Service Principal Object ID
 
-@description('Your User Object ID')
-param userObjectId string //This is your User Object ID
-
 //----------------------------------------------------------------------
 
 //Synapse Module Parameters
@@ -115,25 +130,9 @@ param synapseManagedResourceGroup string
 @description('Provide the user name for SQL login.')
 param sqlAdministratorLogin string
 
+@secure()
 @description('The passwords must meet the following guidelines:<ul><li> The password does not contain the account name of the user.</li><li> The password is at least eight characters long.</li><li> The password contains characters from three of the following four categories:</li><ul><li>Latin uppercase letters (A through Z)</li><li>Latin lowercase letters (a through z)</li><li>Base 10 digits (0 through 9)</li><li>Non-alphanumeric characters such as: exclamation point (!), dollar sign ($), number sign (#), or percent (%).</li></ul></ul> Passwords can be up to 128 characters long. Use passwords that are as long and complex as possible. Visit <a href=https://aka.ms/azuresqlserverpasswordpolicy>aka.ms/azuresqlserverpasswordpolicy</a> for more details.')
 param sqlAdministratorLoginPassword string
-
-//Enabling Double Encryption using a customer-managed key
-//Choose to encrypt all data at rest in the workspace with a key managed by you (customer-managed key). This will provide double encryption with encryption at the infrastructure layer that uses platform-managed keys.
-//The encryption key must be in an Azure Key Vault located in the same region as the Synapse workspace.
-//https://go.microsoft.com/fwlink/?linkid=2147714
-@description('The uri to a key in your Key Vault to add a second layer of encryption on top of the default infrastructure encryption. Key identifier should be in the format of: (i.e. https://{keyvaultname}.vault.azure.net/keys/{keyname}')
-param cmkUri string = ''
-var cmkUriStripVersion = (empty(cmkUri) ? '' : substring(cmkUri, 0, lastIndexOf(cmkUri, '/')))
-var withCmk = {
-  cmk: {
-    key: {
-      name: 'default'
-      keyVaultUrl: cmkUriStripVersion
-    }
-  }
-}
-var encryption = (empty(cmkUri) ? json('{}') : withCmk)
 
 @description('Deploy SQL Pool')
 param ctrlDeploySynapseSQLPool bool = false //Controls the creation of Synapse SQL Pool
@@ -182,15 +181,6 @@ param streamAnalyticsJobName string =  '${prefix}-asa-${uniqueSuffix}'
 @description('Azure Stream Analytics Job Sku')
 param streamAnalyticsJobSku string = 'Standard'
 
-//----------------------------------------------------------------------
-
-//CosmosDB account parameters
-@description('CosmosDB Account Name')
-param cosmosDBAccountName string = '${prefix}-cosmos-${uniqueSuffix}'
-
-@description('CosmosDB Database Name')
-param cosmosDBDatabaseName string = 'CosmosDB'
-
 //********************************************************
 // Variables
 //********************************************************
@@ -203,18 +193,18 @@ var deploymentScriptUAMIName = toLower('${prefix}-uami')
 
 //1. Deploy Required VNet
 //Deploy the VNet (The VNet Module needs to be expanded and will be expanded when we place Synapse Workspace within a Managed VNet that uses Private Endpoints.)
-module m_vnet 'modules/deploy_1_vnet.bicep' = {
-  name: 'deploy_vnet'
-  params: {
-    resourceLocation: resourceLocation
-    networkIsolationMode: networkIsolationMode
-    ctrlNewOrExistingVNet: ctrlNewOrExistingVNet
-    existingVNetResourceGroupName: existingVNetResourceGroupName
-    vNetIPAddressPrefixes: vNetIPAddressPrefixes
-    vNetSubnetName: vNetSubnetName
-    vNetName: vNetName
-  }
-}
+// module m_vnet 'modules/deploy_1_vnet.bicep' = {
+//   name: 'deploy_vnet'
+//   params: {
+//     resourceLocation: resourceLocation
+//     networkIsolationMode: networkIsolationMode
+//     ctrlNewOrExistingVNet: ctrlNewOrExistingVNet
+//     existingVNetResourceGroupName: existingVNetResourceGroupName
+//     vNetIPAddressPrefixes: vNetIPAddressPrefixes
+//     vNetSubnetName: vNetSubnetName
+//     vNetName: vNetName
+//   }
+// }
 
 //2. Deploy Required Storage Account(s)
 //Deploy Storage Accounts (Create your Storage Account (ADLS Gen2 & HNS Enabled) for your Synapse Workspace)
@@ -228,25 +218,49 @@ module m_storage 'modules/deploy_2_storage.bicep' = {
   }
 }
 
-//3. Deploy Required Key Vault
-module m_keyvault 'modules/deploy_3_keyvault.bicep' = {
+//3. Deploy Azure SQL Server(s) and Sample DB
+module m_sqlsvr 'modules/deploy_3_sqlserver.bicep' = {
+  name: 'deploy_sqlserver'
+  params: {
+    resourceLocation: resourceLocation
+    sqlservername: toLower('${prefix}-sql-${uniqueSuffix}') 
+    tags: tags
+    administratorLogin: sqlAdministratorLogin
+    administratorLoginPassword: sqlAdministratorLoginPassword
+    databaseName: 'fasthacksampledb'
+  }
+}
+
+//4. Deploy Required Key Vault
+module m_keyvault 'modules/deploy_4_keyvault.bicep' = {
   name: 'deploy_keyvault'
   params: {
     resourceLocation: resourceLocation
     keyVaultName: keyVaultName
     deploymentScriptUAMIName: deploymentScriptUAMIName
+
+    //Send in Service Principal and/or User Oject ID
     spObjectId: spObjectId
-    userObjectId:userObjectId
+
+    //Send in Storage Account Key and Cnx
     storageAccountKey: m_storage.outputs.storageAccountKey
     storageAccountCnx: m_storage.outputs.storageAccountCnx
+
+    //Send in SQL Server and DB Secrets
+    administratorLogin: sqlAdministratorLogin
+    administratorLoginPassword : sqlAdministratorLoginPassword
+    sqlServerName: m_sqlsvr.outputs.sqlServerName
+    sqlServerDBName: m_sqlsvr.outputs.sqlserverDBName
+    sqlCnxString: 'Server=tcp:${m_sqlsvr.outputs.sqlServerName},1433;Initial Catalog=${m_sqlsvr.outputs.sqlserverDBName};Persist Security Info=False;User ID=${sqlAdministratorLogin};Password=${sqlAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
   }
   dependsOn: [
     m_storage
+    m_sqlsvr 
   ]
 }
 
-//4. Deploy Synapse Workspace
-module m_synapse 'modules/deploy_4_synapse.bicep' = {
+//5.a Deploy Synapse Workspace
+module m_synapse 'modules/deploy_5a_synapse.bicep' = {
   name: 'deploy_synapse'
   params: {
     resourceLocation: resourceLocation
@@ -254,14 +268,14 @@ module m_synapse 'modules/deploy_4_synapse.bicep' = {
     managedResourceGroupName: synapseManagedResourceGroup
 
     networkIsolationMode: networkIsolationMode
-
+    tags: tags
+    
     ctrlDeploySynapseSQLPool: ctrlDeploySynapseSQLPool
     ctrlDeploySynapseSparkPool: ctrlDeploySynapseSparkPool
     ctrlDeploySynapseADXPool: ctrlDeploySynapseADXPool
 
     defaultDataLakeStorageAccountName: storageAccountName
     defaultDataLakeStorageFileSystemName: toLower('${prefix}-synapse')
-    encryption: encryption
     
     //Send in your ipAddress(s) into the synapse module to enable access to your Local IP
     startIpaddress: ipaddress
@@ -292,14 +306,31 @@ module m_synapse 'modules/deploy_4_synapse.bicep' = {
   ]
 }
 
-//Key Vault Access Policy for Synapse
-module m_KeyVaultSynapseAccessPolicy 'modules/deploy_5_keyvaultsynapseaccesspolicy.bicep' = {
+//5.b Deploy Key Vault Access Policy for Synapse
+module m_KeyVaultSynapseAccessPolicy 'modules/deploy_5b_keyvaultsynapseaccesspolicy.bicep' = {
   name: 'deploy_KeyVaultSynapseAccessPolicy'
   params: {
     keyVaultName: keyVaultName
-    synapseWorkspaceIdentityPrincipalID: m_synapse.outputs.synapsePrincipalId
+    synapseManagedIdentityId: m_synapse.outputs.synapseManagedIdentityId
   }
   dependsOn: [
+    m_synapse
+  ]
+}
+
+//********************************************************
+// RBAC Role Assignments
+//********************************************************
+
+module m_RBACRoleAssignment 'modules/deploy_6_RBAC.bicep' = {
+  name: 'deploy_RBAC'
+  params: {
+    dataLakeAccountName: storageAccountName
+    synapseWorkspaceName: m_synapse.outputs.synapseWorkspaceName
+    synapseManagedIdentityId: m_synapse.outputs.synapseManagedIdentityId
+    UAMIPrincipalID: m_keyvault.outputs.deploymentScriptUAMIPrincipalId
+  }
+  dependsOn:[
     m_synapse
   ]
 }
@@ -309,7 +340,7 @@ module m_KeyVaultSynapseAccessPolicy 'modules/deploy_5_keyvaultsynapseaccesspoli
 //********************************************************
 
 //Deploy Event Hub
-module m_eventhub 'modules/deploy_6_eventhub.bicep' = if(ctrlDeployStreaming) {
+module m_eventhub 'modules/deploy_7_eventhub.bicep' = if(ctrlDeployStreaming) {
   name: 'deploy_eventhub'
   params: {
     resourceLocation: resourceLocation
@@ -317,7 +348,7 @@ module m_eventhub 'modules/deploy_6_eventhub.bicep' = if(ctrlDeployStreaming) {
   }
 }
 
-module m_streaminganalytics 'modules/deploy_7_streaminganalytics.bicep' = if(ctrlDeployStreaming) {
+module m_streaminganalytics 'modules/deploy_8_streaminganalytics.bicep' = if(ctrlDeployStreaming) {
   name: 'deploy_streaminganalytics'
   params: {
     resourceLocation: resourceLocation
@@ -328,63 +359,16 @@ module m_streaminganalytics 'modules/deploy_7_streaminganalytics.bicep' = if(ctr
   }
 }
 
-//********************************************************
-// COSMOS DB DEPLOY
-//********************************************************
-
-module m_cosmosdb 'modules/deploy_8_cosmosdb.bicep' = if(ctrlDeployOperationalDB) {
-  name: 'deploy_cosmosdb'
-  params: {
-    resourceLocation: resourceLocation
-    ctrlDeployCosmosDB: ctrlDeployCosmosDB
-    networkIsolationMode: networkIsolationMode
-    cosmosDBAccountName: cosmosDBAccountName
-    cosmosDBDatabaseName: cosmosDBDatabaseName
-    synapseWorkspaceID: m_synapse.outputs.synapseWorkspaceID
-  }
-  dependsOn:[
-    m_synapse
-  ]
-}
-
-//********************************************************
-// RBAC Role Assignments
-//********************************************************
-
-module m_RBACRoleAssignment 'modules/deploy_10_RBAC.bicep' = {
-  name: 'deploy_RBAC'
-  dependsOn:[
-    m_synapse
-  ]
-  params: {
-    ctrlDeployStreaming: ctrlDeployStreaming  
-    ctrlDeployOperationalDB: ctrlDeployOperationalDB
-    ctrlDeployCosmosDB: ctrlDeployCosmosDB
-    dataLakeAccountName: storageAccountName
-    synapseWorkspaceName: m_synapse.outputs.synapseWorkspaceName
-    synapseWorkspaceIdentityPrincipalID: m_synapse.outputs.synapseWorkspaceIdentityPrincipalID
-    UAMIPrincipalID: m_keyvault.outputs.deploymentScriptUAMIPrincipalID
-   
-  }
-}
 
 //********************************************************
 // Post Deployment Scripts
 //********************************************************
 
-resource r_deploymentScriptUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
-  name: deploymentScriptUAMIName
-}
+var synapsePSScriptLocation = 'C:\\Git\\azure\\fasthacks\\GitHub\\fasthackonsynapse\\src\\bicep-deployment\\Pattern1\\PostDeploymentScripts.bicep'  
+var synapseWorkspaceParams = '-SynapseWorkspaceName ${synapseWorkspaceName} -SynapseWorkspaceID ${m_synapse.outputs.synapseWorkspaceID}' //(i.e. -SynapseWorkspaceName fasthack-synapse-xxx -SynapseWorkspaceID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-FastHackOnSynapse-RG/providers/Microsoft.Synapse/workspaces/fasthack-synapse-xxx)
+var datalakeAccountSynapseParams = '-DataLakeAccountName ${storageAccountName} -DataLakeAccountResourceID ${m_storage.outputs.storageAccounResourceId}' //(i.e. -DataLakeAccountName fasthackadlsxxx -DataLakeAccountResourceID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-FastHackOnSynapse-RG/providers/Microsoft.Storage/storageAccounts/fasthackadlsxxx)
+var keyVaultParams = '-KeyVaultName ${keyVaultName} -KeyVaultID ${m_keyvault.outputs.keyVaultID}' //(i.e. -KeyVaultName fasthack-keyvault-xxx -KeyVaultID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-FastHackOnSynapse-RG/providers/Microsoft.KeyVault/vaults/fasthack-keyvault-xxx)
+var uamiParams = '-UAMIPrincipalID ${m_keyvault.outputs.deploymentScriptUAMIPrincipalId}' //(i.e. -UAMIPrincipalID xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+var sampleArtifactsParams = ctrlDeploySampleArtifacts ? '-CtrlDeploySampleArtifacts $True -SampleArtifactCollectioName ${sampleArtifactCollectionName}' : ''
 
-module m_artifacts 'modules/deploy_11_SynapseArtifacts.bicep' = if(ctrlDeployArtifacts) {
-  name: 'deploy_artifacts'
-  params: {
-    dataLakeAccountName: storageAccountName
-    synapseWorkspaceName: m_synapse.outputs.synapseWorkspaceName
-    synapseWorkspaceIdentityPrincipalID: m_synapse.outputs.synapseWorkspaceIdentityPrincipalID
-    UAMIPrincipalID: m_keyvault.outputs.deploymentScriptUAMIPrincipalID
-  }
-  dependsOn:[
-    m_synapse
-  ]
-}
+var synapseScriptArguments = '-SubscriptionID ${subscription().subscriptionId} -ResourceGroupName ${resourceGroup().name} -ResourceGroupLocation ${resourceLocation} ${synapseWorkspaceParams} ${datalakeAccountSynapseParams} ${keyVaultParams} ${uamiParams} ${sampleArtifactsParams}' 

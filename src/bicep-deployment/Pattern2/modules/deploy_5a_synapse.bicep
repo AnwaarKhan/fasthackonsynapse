@@ -3,17 +3,17 @@
       1 - Create Synapse Workspace
       2 - Create your Firewall settings
       3 - Set the minimal TLS version for the SQL Pools 
-      4 - Create your Dedicated SQL Pool
-      5 - Create your Dedicated Apache Spark Pool
-      6 - Create your Dedicated ADX Kusto Pool
+      4 - Create your Dedicated SQL Pool (Optional)
+      5 - Create your Dedicated Apache Spark Pool (Optional)
+      6 - Create your Dedicated ADX Kusto Pool (Optional)
       7 - Grant/Set Synapse MSI as SQL Admin
 */
 
 //Declare Parameters--------------------------------------------------------------------------------------------------------------------------
 param synapseWorkspaceName string
 param resourceLocation string = resourceGroup().location
-
 param networkIsolationMode string
+param tags object
 
 param ctrlDeploySynapseSQLPool bool
 param ctrlDeploySynapseSparkPool bool
@@ -31,10 +31,6 @@ param defaultDataLakeStorageAccountName string
 param defaultDataLakeStorageFileSystemName string
 param defaultAdlsGen2AccountResourceId string = ''
 param managedResourceGroupName string
-
-@description('The encryption object containing your customer-managed key used for double encryption (optional).')
-param encryption object = {
-}
 
 //Parameters for the Synapse Firewall
 param createManagedPrivateEndpoint bool = false
@@ -63,73 +59,56 @@ param synapseADXPoolMaxSize int
 
 //Create Resources----------------------------------------------------------------------------------------------------------------------------
 
-//https://docs.microsoft.com/en-us/azure/templates/microsoft.synapse/workspaces?tabs=bicep
+//https://docs.microsoft.com/en-us/azure/templates/microsoft.synapse/workspaces
 //1. Create your Synapse Workspace
 resource r_synapseWorkspace 'Microsoft.Synapse/workspaces@2021-06-01' = {
   name: synapseWorkspaceName
   location: resourceLocation
+  tags: tags
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
+    azureADOnlyAuthentication: false  
+    // connectivityEndpoints: {
+    //   web: 'https://web.azuresynapse.net?workspace=%2fsubscriptions%2f${subscription().subscriptionId}2fresourceGroups%2f${resourceGroup().name}%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2f${synapseWorkspaceName}'
+    //   dev: 'https://${synapseWorkspaceName}.dev.azuresynapse.net'
+    //   sqlOnDemand: '${synapseWorkspaceName}-ondemand.sql.azuresynapse.net'
+    //   sql: '${synapseWorkspaceName}.sql.azuresynapse.net'
+    // }
+    // cspWorkspaceAdminProperties: {
+    //   initialWorkspaceAdminObjectId: userObjectId
+    // }
     defaultDataLakeStorage: {
       accountUrl: defaultDataLakeStorageAccountUrl
       createManagedPrivateEndpoint: createManagedPrivateEndpoint
       filesystem: defaultDataLakeStorageFileSystemName
       resourceId: defaultAdlsGen2AccountResourceId
     }
-    encryption: encryption
     managedResourceGroupName: managedResourceGroupName
+    //Setting this to 'default' will ensure that all compute for this workspace is in a virtual network managed on behalf of the user.
+    managedVirtualNetwork: 'default'
+    managedVirtualNetworkSettings: {
+      preventDataExfiltration: false
+    }
+    //publicNetworkAccess: Post Deployment Script will disable public network access for vNet integrated deployments.
+    publicNetworkAccess: 'Enabled'
     sqlAdministratorLogin: sqlAdministratorLogin
     sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
-     //publicNetworkAccess: Post Deployment Script will disable public network access for vNet integrated deployments.
-     managedVirtualNetwork: (networkIsolationMode == 'vNet') ? 'default' : ''
-     managedVirtualNetworkSettings: (networkIsolationMode == 'vNet') ? {
-       preventDataExfiltration: true
-     }: {
-      preventDataExfiltration: false
-      allowedAadTenantIdsForLinking: []
-    }
-    // connectivityEndpoints: {
-    //   web: 'https://web.azuresynapse.net?workspace=%2fsubscriptions%2f831a353b-37df-42bb-b4da-cfec630a5cfe%2fresourceGroups%2fA-Synapse-End2End%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2f${workspaces_airmanavnet_name}'
-    //   dev: 'https://${workspaces_airmanavnet_name}.dev.azuresynapse.net'
-    //   sqlOnDemand: '${workspaces_airmanavnet_name}-ondemand.sql.azuresynapse.net'
-    //   sql: '${workspaces_airmanavnet_name}.sql.azuresynapse.net'
-    // }
-    // cspWorkspaceAdminProperties: {
-    //   initialWorkspaceAdminObjectId: 'b3359b94-5c98-440a-bad6-d4e69512b0fc'
-    // }
-    azureADOnlyAuthentication: false
-    publicNetworkAccess: 'Enabled'
     trustedServiceBypassEnabled: true
-    workspaceRepositoryConfiguration: {
-      accountName: 'APOps'
-      collaborationBranch: 'main'
-      hostName: 'https://dev.azure.com' //https://dev.azure.com/APOps/_git/FastHacks
-      projectName: 'FastHacks'
-      repositoryName: 'SynapseRepo'
-      rootFolder: '/'
-      tenantId: environment().authentication.tenant
-      type: 'WorkspaceVSTSConfiguration' //This can either be WorkspaceVSTSConfiguration or WorkspaceGitHubConfiguration
-    }
-  }
-}
-
-resource workspaces_AutoResolveIntegrationRuntime 'Microsoft.Synapse/workspaces/integrationruntimes@2021-06-01' = {
-  parent: r_synapseWorkspace
-  name: 'AutoResolveIntegrationRuntime'
-  properties: {
-    type: 'Managed'
-    typeProperties: {
-      computeProperties: {
-        location: 'AutoResolve'
-      }
-    }
-    managedVirtualNetwork: {
-      referenceName: 'default'
-      type: 'ManagedVirtualNetworkReference'
-      id: '6943c986-3df1-4bf9-98af-636fb351f46c'
-    }
+    
+    //Synapse Git Integration Settings
+    //If you want to integrate your GitHub Repo You can go ahead and uncomment these lines below. Just be sure to put in your accountName, DevOps HostName, projectName, and RepoName
+    // workspaceRepositoryConfiguration: {
+    //   accountName: 'YOURDEVOPSACCOUNTNAME'
+    //   collaborationBranch: 'main'
+    //   hostName: 'https://dev.azure.com' //https://dev.azure.com/YOURDEVOPSORG/_git/YOURDEVOPSPROJECTNAME
+    //   projectName: 'YOURDEVOPSPROJECTNAME'
+    //   repositoryName: 'YOURDEVOPSREPONAME'
+    //   rootFolder: '/'
+    //   tenantId: environment().authentication.tenant
+    //   type: 'WorkspaceVSTSConfiguration' //This can either be WorkspaceVSTSConfiguration or WorkspaceGitHubConfiguration
+    // }
   }
 }
 
@@ -253,10 +232,7 @@ resource r_managedIdentitySqlControlSettings 'Microsoft.Synapse/workspaces/manag
   }
 }
 
-
-
-
-
+output synapseManagedIdentityId string = r_synapseWorkspace.identity.principalId
 output synapseWorkspaceID string = r_synapseWorkspace.id
 output synapseWorkspaceName string = r_synapseWorkspace.name
 

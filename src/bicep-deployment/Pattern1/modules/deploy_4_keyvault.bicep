@@ -9,12 +9,18 @@
 param resourceLocation string
 param keyVaultName string
 param deploymentScriptUAMIName string
-
 param spObjectId string
-param userObjectId string
+
 @secure()
 param storageAccountKey string 
 param storageAccountCnx string
+
+param administratorLogin string
+@secure()
+param administratorLoginPassword string
+param sqlServerName string
+param sqlServerDBName string
+param sqlCnxString string
 
 //var vaultUri = toLower('https://${keyVaultName}.vault.azure.net/')
 
@@ -36,10 +42,6 @@ resource r_keyVault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
     sku: {
       family: 'A'
       name: 'standard'
-    }
-    networkAcls: { //Rules governing the accessibility of the key vault from specific network locations.
-      //defaultAction: (networkIsolationMode == 'vNet')? 'Deny' : 'Allow'
-      //bypass:'AzureServices'
     }
     tenantId: subscription().tenantId
     accessPolicies: [
@@ -73,28 +75,11 @@ resource r_keyVault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
           ]
         }
       }
-      {
-        tenantId: subscription().tenantId
-        objectId: userObjectId //This is your User Object ID so you can give your User access to the Key Vault Secrets
-        permissions: {
-          secrets: [
-            'get'
-            'list'
-            'set'
-            'delete'
-            'recover'
-            'backup'
-            'restore'
-          ]
-        }
-      }
     ]
     enabledForDeployment: true
     enabledForDiskEncryption: true
-    //enableSoftDelete: true
     enabledForTemplateDeployment: true
     enableRbacAuthorization: false
-    //vaultUri: vaultUri
     provisioningState: 'Succeeded'
     publicNetworkAccess: 'Enabled'
   }
@@ -138,30 +123,6 @@ resource vault_secret_ServicePrincipalSecret 'Microsoft.KeyVault/vaults/secrets@
   }
 }
 
-resource vault_secret__ConnectionStrings_CnxDB 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  name: 'ConnectionStrings--CnxDB'
-  parent: r_keyVault
-  properties: {
-    attributes: {
-      enabled: true
-    }
-    contentType: 'string'
-    value: 'AzureSQLDBCnx'
-  }
-}
-
-resource vault_secret__ConnectionStrings_CnxDB_Password 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  name: 'ConnectionStrings--CnxDB--Password'
-  parent: r_keyVault
-  properties: {
-    attributes: {
-      enabled: true
-    }
-    contentType: 'string'
-    value: 'Password'
-  }
-}
-
 resource vault_secret__TenantId 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   name: 'TenantId'
   parent: r_keyVault
@@ -174,9 +135,70 @@ resource vault_secret__TenantId 'Microsoft.KeyVault/vaults/secrets@2021-11-01-pr
   }
 }
 
+resource vault_secret__ConnectionStrings_CnxDB 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  name: 'ConnectionStrings--CnxDB'
+  parent: r_keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    contentType: 'string'
+    value: sqlCnxString
+  }
+}
+
+resource vault_secret__ConnectionStrings_CnxDB_Admin 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  name: 'ConnectionStrings--CnxDB--Admin'
+  parent: r_keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    contentType: 'string'
+    value: administratorLogin
+  }
+}
+
+resource vault_secret__ConnectionStrings_CnxDB_Password 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  name: 'ConnectionStrings--CnxDB--Password'
+  parent: r_keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    contentType: 'string'
+    value: administratorLoginPassword
+  }
+}
+
+resource vault_secret__Svr 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  name: 'AzureSQL-Server'
+  parent: r_keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    contentType: 'string'
+    value: sqlServerName
+  }
+}
+
+resource vault_secret__SQLDB 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  name: 'AzureSQL-DB'
+  parent: r_keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    contentType: 'string'
+    value: sqlServerDBName
+  }
+}
+
 
  output keyVaultID string = r_keyVault.id
  output keyVaultName string = r_keyVault.name
- output deploymentScriptUAMIID string = r_deploymentScriptUAMI.id
  output deploymentScriptUAMIName string = r_deploymentScriptUAMI.name
- output deploymentScriptUAMIPrincipalID string = r_deploymentScriptUAMI.properties.principalId
+ output deploymentScriptUAMIResourceId string = r_deploymentScriptUAMI.id
+ output deploymentScriptUAMIPrincipalId string = r_deploymentScriptUAMI.properties.principalId
+
