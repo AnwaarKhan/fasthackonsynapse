@@ -139,15 +139,15 @@ function Save-SynapseSampleArtifacts{
   $headers = @{ Authorization = "Bearer $token" }
 
   $synapseTokens = @{"`#`#azsynapsewks`#`#" = $SynapseWorkspaceName; }
-  #$indexFileUrl = "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/index.json"
-  $indexFileUrl = "index.json"
-  #$sampleCodeIndex = $indexFileUrl | ConvertFrom-Json
-  $sampleCodeIndex = Get-Content -Raw -Path index.json | ConvertFrom-Json
-  #$sampleCodeIndex = Invoke-WebRequest $indexFileUrl | ConvertFrom-Json
+  $indexFileUrl = "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/index.json"
+  #$indexFileUrl = "index.json"
+  #$sampleCodeIndex = Get-Content -Raw -Path index.json | ConvertFrom-Json
+  $sampleCodeIndex = Invoke-WebRequest $indexFileUrl | ConvertFrom-Json
+
+  Write-Host "Deploying SynapseSampleArtifacts:"
 
   foreach($sampleArtifactCollection in $sampleCodeIndex)
   {
-
     if ($sampleArtifactCollection.template -eq $SampleArtifactCollectionName) {
       Write-Host "Deploying Sample Artifact Collection: $($sampleArtifactCollection.template)"
       Write-Host "-----------------------------------------------------------------------"
@@ -238,6 +238,7 @@ function Save-SynapseSampleArtifacts{
       Write-Host "-----------------------------------------------------------------------"
       Write-Host "Deploying Dataflows:"
       Write-Host "-----------------------------------------------------------------------"
+
       foreach($dataflow in $sampleArtifactCollection.artifacts.dataflows)
       {
         $fileContent = Invoke-WebRequest $dataflow.definitionFilePath
@@ -260,6 +261,7 @@ function Save-SynapseSampleArtifacts{
       Write-Host "-----------------------------------------------------------------------"
       Write-Host "Deploying Pipelines:"
       Write-Host "-----------------------------------------------------------------------"
+
       foreach($pipeline in $sampleArtifactCollection.artifacts.pipelines)
       {
         $fileContent = Invoke-WebRequest $pipeline.definitionFilePath
@@ -283,6 +285,7 @@ function Save-SynapseSampleArtifacts{
       Write-Host "-----------------------------------------------------------------------"
       Write-Host "Deploying Notebooks:"
       Write-Host "-----------------------------------------------------------------------"
+
       foreach($notebook in $sampleArtifactCollection.artifacts.notebooks)
       {
         $fileContent = Invoke-WebRequest $notebook.definitionFilePath
@@ -351,7 +354,6 @@ $body = "{
 }"
 
 Write-Host "Assign Synapse Administrator Role to UAMI..."
-
 Invoke-RestMethod -Method Post -ContentType "application/json" -Uri $uri -Headers $headers -Body $body
 
 #------------------------------------------------------------------------------------------------------------
@@ -359,7 +361,6 @@ Invoke-RestMethod -Method Post -ContentType "application/json" -Uri $uri -Header
 #------------------------------------------------------------------------------------------------------------
 
 #Create AKV Linked Service. Linked Service name same as Key Vault's.
-
 $body = "{
   name: ""$KeyVaultName"",
   properties: {
@@ -371,12 +372,33 @@ $body = "{
   }
 }"
 
+Write-Host "Create AKV Linked Service..."
 Save-SynapseLinkedService $SynapseWorkspaceName $KeyVaultName $body
+
+#Create a Second AKV Linked Service that uses parameters to connect to the Key Vault created through the bicep
+$body = "{
+  name: ""$KeyVaultName-with-params"",
+  properties: {
+    parameters: {
+			keyVaultName: {
+				type: ""string"",
+        defaultValue: ""$KeyVaultName""
+			}
+		},
+    annotations: [],
+    type: ""AzureKeyVault"",
+    typeProperties: {
+      baseUrl: ""@{concat('https://',linkedService().keyVaultName,'.vault.azure.net/')}""
+    }
+  }
+}"
+
+Write-Host "Create AKV Linked Service with parameters..."
+Save-SynapseLinkedService $SynapseWorkspaceName "$KeyVaultName-with-params" $body
 
 #------------------------------------------------------------------------------------------------------------
 # DATA PLANE OPERATION: CREATE ADLS LINKED SERVICE
 #------------------------------------------------------------------------------------------------------------
-
  $dataLakeAccountNames = @($DataLakeAccountName)
  $dataLakeDFSEndpoints = @("https://$DataLakeAccountName.dfs.core.windows.net")
 
@@ -397,13 +419,64 @@ Save-SynapseLinkedService $SynapseWorkspaceName $KeyVaultName $body
     }
   }"
 
+  Write-Host "Create DataLake Linked Service..."
   Save-SynapseLinkedService $SynapseWorkspaceName $DataLakeAccountName $body
 }
+
+$body = "{
+  name: ""TripFaresDataLakeStorageLS"",
+  properties: {
+    parameters: {
+      keyVaultName: {
+        type: ""string"",
+        defaultValue: ""$KeyVaultName""
+      },
+      datalakeAccountName: {
+        type: ""string"",
+        defaultValue: ""$DataLakeAccountName""
+      }
+    },
+    annotations: [],
+    type: ""AzureBlobFS"",
+    typeProperties: {
+      url: ""@{concat('https://',linkedService().datalakeAccountName,'.dfs.core.windows.net')}"",
+      accountKey: {
+        type: ""AzureKeyVaultSecret"",
+        store: {
+            referenceName: ""keyVaultLinkedservice"",
+            type: ""LinkedServiceReference"",
+            parameters: {
+                keyVaultName: {
+                    value: ""@linkedService().keyVaultName"",
+                    type: ""Expression""
+                }
+            }
+        },
+        secretName: ""ADLS--AccountKey""
+      }
+    },
+    connectVia: {
+      referenceName: ""AutoResolveIntegrationRuntime"",
+      type: ""IntegrationRuntimeReference""
+    }
+  }
+}"
+
+Write-Host "Create DataLake Linked Service..."
+Save-SynapseLinkedService $SynapseWorkspaceName "TripFaresDataLakeStorageLS" $body
+
+#upload sample csv to public container of newly created storage account
+$secret = Get-AzKeyVaultSecret -VaultName $KeyVaultName -Name "ADLS--AccountKey" -AsPlainText
+$context = New-AzStorageContext -StorageAccountName $DataLakeAccountName -StorageAccountKey $secret
+Start-AzStorageBlobCopy -AbsoluteUri "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/tripDataAndFaresCSV/trip-data.csv" -DestContainer "public" -DestBlob "trip-data.csv" -DestContext $context -Force
+Start-AzStorageBlobCopy -AbsoluteUri "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/tripDataAndFaresCSV/fares-data.csv" -DestContainer "public" -DestBlob "fares-data.csv" -DestContext $context -Force
 
 #------------------------------------------------------------------------------------------------------------
 # DATA PLANE OPERATION: CREATE SQL SERVER LINKED SERVICE
 #------------------------------------------------------------------------------------------------------------
 $sqlAccountName = $AzureSQLServerName -replace ("-","_")
+
+Write-Host "AzureSQLServerName: $AzureSQLServerName"
 
 $body = "{
   name: ""$($AzureSQLServerName)"",
@@ -438,5 +511,4 @@ Save-SynapseLinkedService $SynapseWorkspaceName $AzureSQLServerName $body
 if ($CtrlDeploySampleArtifacts) {
   Save-SynapseSampleArtifacts $SynapseWorkspaceName $SampleArtifactCollectioName
 }
-
 #endregion Entry Point

@@ -10,9 +10,8 @@ variables:
   objectID: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
 
   # Azure DevOps 
-  ado_service_connection_rg: Azure-ARM-Dev-SAPA
-  # github
-  gihub_repo_name: "Azure/fasthackonsynapse" #Not required if you are not using workspace_publish branch for Azure synapse
+  ado_service_connection_rg: YOURADOSERVICECONNECTIONNAME
+
 
   # IaC
   baseName: $(prefix)$(postfix)$(environment)
@@ -24,5 +23,3 @@ variables:
   synapseWorkspace: $(prefix)-synapse-$(postfix)-$(environment)
   synapsedatalakegen2name: $(prefix)adlssyn$(postfix)$(environment)
   keyVaultName: $(prefix)-akv-$(postfix)-$(environment)
-
-

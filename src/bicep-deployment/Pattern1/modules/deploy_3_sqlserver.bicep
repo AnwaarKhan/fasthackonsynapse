@@ -61,5 +61,6 @@ resource r_sqlserverdatabase 'Microsoft.Sql/servers/databases@2022-02-01-preview
   }
 }
 
-output sqlServerName string = r_sqlserver.properties.fullyQualifiedDomainName
+output sqlServerNameDomainName string = r_sqlserver.properties.fullyQualifiedDomainName
+output sqlServerName string = r_sqlserver.name
 output sqlserverDBName  string = r_sqlserverdatabase.name

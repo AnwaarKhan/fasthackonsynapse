@@ -3,6 +3,8 @@ param resourceLocation string
 param deploymentScriptUAMIResourceId string
 param synapseScriptArguments string
 
+//https://docs.microsoft.com/en-us/azure/templates/microsoft.resources/deploymentscripts?pivots=deployment-language-bicep
+//https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template
 resource runPowerShellInline 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name:'PostDeploymentScript-${deploymentDatetime}'
   location: resourceLocation

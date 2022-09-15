@@ -6,22 +6,27 @@
                 {
                     "name": "nyc_tlc_yellow",
                     "interface": "powershell",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/LinkedServices/nyc_tlc_yellow.json",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/synapsepoc/linkedService/nyc_tlc_yellow.json",
                     "tokens": []
                 },
                 {
                     "name": "HttpServerTripDataLinkedService",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/linkedService/HttpServerTripDataLinkedService.json",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/synapsepoc/linkedService/HttpServerTripDataLinkedService.json",
                     "tokens": []
                 },
                 {
                     "name": "HttpServerTripFareDataLinkedService",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/linkedService/HttpServerTripFareDataLinkedService.json",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/synapsepoc/linkedService/HttpServerTripFareDataLinkedService.json",
                     "tokens": []
                 },
                 {
                     "name": "keyVaultLinkedservice",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/linkedService/keyVaultLinkedservice.json",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/synapsepoc/linkedService/keyVaultLinkedservice.json",
+                    "tokens": []
+                },
+                {
+                    "name": "TripFaresDataLakeStorageLinkedService",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/synapsepoc/linkedService/TripFaresDataLakeStorageLinkedService.json",
                     "tokens": []
                 }
             ],
@@ -91,7 +96,6 @@
                     "workspaceFolderPath": "OpenDatasets/Dedicated SQL",
                     "tokens": []
                 }
-
             ],
             "notebooks": [
                 {
@@ -147,9 +151,25 @@
                     "name": "faresDataSource",
                     "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/faresDataSource.json",
                     "tokens": []
+                },
+                {
+                    "name": "tripDataSink",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/tripDataSink.json",
+                    "tokens": []
+                },
+                {
+                    "name": "faresDataSink",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/faresDataSink.json",
+                    "tokens": []
                 }
             ],
-            "pipelines": []
+            "pipelines": [
+                {
+                    "name": "TripFaresDataPipeline",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/synapsepoc/pipeline/TripFaresDataPipeline-CSV-to-ADLS.json",
+                    "tokens": []
+                }
+            ]
         }
     }
 ]
