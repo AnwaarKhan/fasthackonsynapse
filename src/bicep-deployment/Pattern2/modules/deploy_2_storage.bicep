@@ -146,6 +146,16 @@ resource containerCurated 'Microsoft.Storage/storageAccounts/blobServices/contai
   ]
 } 
 
+//8. Create another container called public in the root
+resource containerPublic 'Microsoft.Storage/storageAccounts/blobServices/containers@2021-09-01' = {
+  name: '${storageAccount_resource.name}/default/public'
+  properties: {
+    publicAccess: 'None'
+  }
+  dependsOn:[
+    storageAccount_default
+  ]
+} 
 
 // Taking the first key
 var key = storageAccount_resource.listKeys().keys[0].value

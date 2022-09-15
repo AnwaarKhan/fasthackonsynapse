@@ -249,9 +249,9 @@ module m_keyvault 'modules/deploy_4_keyvault.bicep' = {
     //Send in SQL Server and DB Secrets
     administratorLogin: sqlAdministratorLogin
     administratorLoginPassword : sqlAdministratorLoginPassword
-    sqlServerName: m_sqlsvr.outputs.sqlServerName
+    sqlServerName: m_sqlsvr.outputs.sqlServerNameDomainName
     sqlServerDBName: m_sqlsvr.outputs.sqlserverDBName
-    sqlCnxString: 'Server=tcp:${m_sqlsvr.outputs.sqlServerName},1433;Initial Catalog=${m_sqlsvr.outputs.sqlserverDBName};Persist Security Info=False;User ID=${sqlAdministratorLogin};Password=${sqlAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+    sqlCnxString: 'Server=tcp:${m_sqlsvr.outputs.sqlServerNameDomainName},1433;Initial Catalog=${m_sqlsvr.outputs.sqlserverDBName};Persist Security Info=False;User ID=${sqlAdministratorLogin};Password=${sqlAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
   }
   dependsOn: [
     m_storage
@@ -363,12 +363,25 @@ module m_streaminganalytics 'modules/deploy_8_streaminganalytics.bicep' = if(ctr
 //********************************************************
 // Post Deployment Scripts
 //********************************************************
-
-var synapsePSScriptLocation = 'C:\\Git\\azure\\fasthacks\\GitHub\\fasthackonsynapse\\src\\bicep-deployment\\Pattern1\\PostDeploymentScripts.bicep'  
 var synapseWorkspaceParams = '-SynapseWorkspaceName ${synapseWorkspaceName} -SynapseWorkspaceID ${m_synapse.outputs.synapseWorkspaceID}' //(i.e. -SynapseWorkspaceName fasthack-synapse-xxx -SynapseWorkspaceID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-FastHackOnSynapse-RG/providers/Microsoft.Synapse/workspaces/fasthack-synapse-xxx)
 var datalakeAccountSynapseParams = '-DataLakeAccountName ${storageAccountName} -DataLakeAccountResourceID ${m_storage.outputs.storageAccounResourceId}' //(i.e. -DataLakeAccountName fasthackadlsxxx -DataLakeAccountResourceID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-FastHackOnSynapse-RG/providers/Microsoft.Storage/storageAccounts/fasthackadlsxxx)
 var keyVaultParams = '-KeyVaultName ${keyVaultName} -KeyVaultID ${m_keyvault.outputs.keyVaultID}' //(i.e. -KeyVaultName fasthack-keyvault-xxx -KeyVaultID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-FastHackOnSynapse-RG/providers/Microsoft.KeyVault/vaults/fasthack-keyvault-xxx)
+var sqlParams = '-AzureSQLServerName ${m_sqlsvr.outputs.sqlServerName}' //(i.e. -AzureSQLServerName fasthack-sql-xxx)
 var uamiParams = '-UAMIPrincipalID ${m_keyvault.outputs.deploymentScriptUAMIPrincipalId}' //(i.e. -UAMIPrincipalID xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+
 var sampleArtifactsParams = ctrlDeploySampleArtifacts ? '-CtrlDeploySampleArtifacts $True -SampleArtifactCollectioName ${sampleArtifactCollectionName}' : ''
 
-var synapseScriptArguments = '-SubscriptionID ${subscription().subscriptionId} -ResourceGroupName ${resourceGroup().name} -ResourceGroupLocation ${resourceLocation} ${synapseWorkspaceParams} ${datalakeAccountSynapseParams} ${keyVaultParams} ${uamiParams} ${sampleArtifactsParams}' 
+var synapseScriptArguments = '-SubscriptionID ${subscription().subscriptionId} -ResourceGroupName ${resourceGroup().name} -ResourceGroupLocation ${resourceLocation} ${synapseWorkspaceParams} ${datalakeAccountSynapseParams} ${keyVaultParams} ${sqlParams} ${uamiParams} ${sampleArtifactsParams}' 
+
+module m_PostDeploymentScripts 'modules/deploy_7_Artifacts.bicep' = {
+  name: 'PostDeploymentScript'
+  dependsOn: [
+      m_RBACRoleAssignment
+  ]
+  params: {
+    deploymentDatetime: utcValue
+    deploymentScriptUAMIResourceId: m_keyvault.outputs.deploymentScriptUAMIResourceId
+    resourceLocation: resourceLocation
+    synapseScriptArguments: synapseScriptArguments
+  }
+}
