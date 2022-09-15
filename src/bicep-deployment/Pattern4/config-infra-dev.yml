@@ -10,7 +10,7 @@ variables:
   objectID: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
 
   # Azure DevOps 
-  ado_service_connection_rg: YOURADOSERVICECONNECTIONNAME
+  ado_service_connection_rg: Azure-ARM-Dev-SAPA
 
 
   # IaC
