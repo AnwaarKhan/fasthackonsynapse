@@ -157,7 +157,6 @@ resource containerPublic 'Microsoft.Storage/storageAccounts/blobServices/contain
   ]
 } 
 
-
 // Taking the first key
 var key = storageAccount_resource.listKeys().keys[0].value
 
