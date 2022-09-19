@@ -44,9 +44,6 @@
         "synapseSparkPoolMaxNodeCount":{
           "value": 3
         },
-        "cmkUri": {
-          "value": "" //i.e. https://{keyvaultname}.vault.azure.net/keys/{keyname}
-        },
         "spObjectId":{
           "value": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" //Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role to deploy the solution)
         }

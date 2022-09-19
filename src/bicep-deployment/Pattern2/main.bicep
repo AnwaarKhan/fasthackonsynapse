@@ -30,9 +30,16 @@
 //********************************************************
 // Workload Deployment Control Parameters
 //********************************************************
-param ctrlDeployStreaming bool = false               //Controls the deployment of EventHubs and Stream Analytics
+param ctrlDeployStreaming bool = true                //Controls the deployment of EventHubs and Stream Analytics
 param ctrlDeployOperationalDB bool = false           //Controls the creation of operational Azure database data sources
-param ctrlDeploySampleArtifacts bool = false         //Controls the creation of sample artifcats (SQL Scripts, Notebooks, Linked Services, Datasets, Dataflows, Pipelines) based on chosen template.
+param ctrlDeploySampleArtifacts bool = true         //Controls the creation of sample artifcats (SQL Scripts, Notebooks, Linked Services, Datasets, Dataflows, Pipelines) based on chosen template.
+
+@description('Deploy SQL Pool')
+param ctrlDeploySynapseSQLPool bool = true //Controls the creation of Synapse SQL Pool
+@description('Deploy Spark Pool')
+param ctrlDeploySynapseSparkPool bool = true //Controls the creation of Synapse Spark Pool
+@description('Deploy ADX Pool')
+param ctrlDeploySynapseADXPool bool = false //Controls the creation of Synapse Spark Pool
 
 //********************************************************
 // Global Parameters
@@ -134,13 +141,6 @@ param sqlAdministratorLogin string
 @description('The passwords must meet the following guidelines:<ul><li> The password does not contain the account name of the user.</li><li> The password is at least eight characters long.</li><li> The password contains characters from three of the following four categories:</li><ul><li>Latin uppercase letters (A through Z)</li><li>Latin lowercase letters (a through z)</li><li>Base 10 digits (0 through 9)</li><li>Non-alphanumeric characters such as: exclamation point (!), dollar sign ($), number sign (#), or percent (%).</li></ul></ul> Passwords can be up to 128 characters long. Use passwords that are as long and complex as possible. Visit <a href=https://aka.ms/azuresqlserverpasswordpolicy>aka.ms/azuresqlserverpasswordpolicy</a> for more details.')
 param sqlAdministratorLoginPassword string
 
-@description('Deploy SQL Pool')
-param ctrlDeploySynapseSQLPool bool = false //Controls the creation of Synapse SQL Pool
-@description('Deploy Spark Pool')
-param ctrlDeploySynapseSparkPool bool = false //Controls the creation of Synapse Spark Pool
-@description('Deploy ADX Pool')
-param ctrlDeploySynapseADXPool bool = false //Controls the creation of Synapse Spark Pool
-
 //Synapse Workspace SQL Pool Parameters
 @description('SQL Pool Name')
 param synapseDedicatedSQLPoolName string = 'SQLPool'
@@ -159,10 +159,9 @@ param synapseSparkPoolMinNodeCount int = 3
 @description('Spark Max Node Count')
 param synapseSparkPoolMaxNodeCount int = 3
 
-
 //Synapse Workspace ADX Pool Parameters
 @description('ADX Pool Name')
-param synapseADXPoolName string = '${prefix}-adxpool-${uniqueSuffix}'
+param synapseADXPoolName string = '${prefix}adxpool${uniqueSuffix}'
 @description('ADX Database Name')
 param synapseADXDatabaseName string = 'ADXDB'
 @description('ADX Pool Enable Auto-Scale')

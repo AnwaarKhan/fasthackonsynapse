@@ -206,6 +206,12 @@ resource r_adxPool 'Microsoft.Synapse/workspaces/kustoPools@2021-06-01-preview' 
       minimum: synapseADXPoolMinSize
       version: 1
     } 
+    workspaceUID: r_synapseWorkspace.properties.workspaceUID
+  }
+  sku: {
+    capacity: 2
+    name: 'Compute optimized'
+    size: 'Extra small'
   }
   //Double check this syntax ->https://docs.microsoft.com/en-us/azure/templates/microsoft.synapse/workspaces/kustopools/databases
   resource r_adxDatabase 'databases' = {
@@ -213,12 +219,16 @@ resource r_adxPool 'Microsoft.Synapse/workspaces/kustoPools@2021-06-01-preview' 
     kind: 'ReadWrite'
     location: resourceLocation
   }
-  sku: {
-    capacity: 2
-    name: 'Compute optimized'
-    size: 'Extra small'
-  }
 }
+
+//https://docs.microsoft.com/en-us/azure/templates/microsoft.synapse/workspaces/kustopools/databases?pivots=deployment-language-bicep
+// resource symbolicname 'Microsoft.Synapse/workspaces/kustoPools/databases@2021-06-01-preview' = if (ctrlDeploySynapseADXPool == true) {
+//   name: synapseADXDatabaseName
+//   location: resourceLocation
+//   kind: 'ReadWrite'
+//   parent: r_adxPool
+//   // For remaining properties, see workspaces/kustoPools/databases objects
+// }
 
 //https://docs.microsoft.com/en-us/azure/templates/microsoft.synapse/workspaces/managedidentitysqlcontrolsettings
 //7. Grant/Set Synapse MSI as SQL Admin
