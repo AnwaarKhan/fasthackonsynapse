@@ -121,7 +121,7 @@ stages :
       steps:
       - checkout: self
       - task: AzureSynapseWorkspace.synapsecicd-deploy.synapse-deploy.Synapse workspace deployment@1
-        displayName: 'Synapse deployment task for workspace: synwfasthackpt1dev'
+        displayName: 'Synapse deployment task for workspace: $(synapseWorkspace) '
         inputs:
           TemplateFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern4/src/workspace_publish_pattern_4/TemplateForWorkspace.json'
           ParametersFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern4/src/workspace_publish_pattern_4/TemplateParametersForWorkspace.json'
