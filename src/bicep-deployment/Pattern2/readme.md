@@ -1,6 +1,6 @@
-## <img src ='https://airsblobstorage.blob.core.windows.net/airstream/bicep.png' alt="FTA Analytics-in-a-Box: Bicep Deployment" width="50px" style="float: left; margin-right:10px;"> Pattern 1: Bicep Deployment (Azure Synapse Analytics workspace)
+## <img src ='https://airsblobstorage.blob.core.windows.net/airstream/bicep.png' alt="FTA Analytics-in-a-Box: Bicep Deployment" width="50px" style="float: left; margin-right:10px;"> Pattern 2: Bicep Deployment (Azure Synapse Analytics workspace)
 
-## <img src="/Assets/images/pattern1-architecture.png" alt="FTA Analytics-in-a-Box: Pattern 1 Deployment" style="float: left; margin-right:10px;" />
+## <img src="/Assets/images/pattern2-architecture.png" alt="FTA Analytics-in-a-Box: Pattern 1 Deployment" style="float: left; margin-right:10px;" />
 
 ### Preparation
 1. Install az cli  
@@ -33,7 +33,10 @@ Install-Module -Name Az.Synapse
           "value": "Standard_LRS"
         },
         "synapseManagedResourceGroup": {
-          "value": "P1-AnalyticsFundamentals-Managed-RG"
+          "value": "P2-AnalyticsFundamentals-Managed-RG"
+        },
+        "ipaddress": {
+          "value": "xx.xxx.xxx.xx" //This is your local IP address that will allow you to see into your workspace
         },
         "sqlAdministratorLogin": {
           "value" : "sqladminuser"
@@ -41,8 +44,29 @@ Install-Module -Name Az.Synapse
         "sqlAdministratorLoginPassword": {
           "value": "Xx$$x0xx"
         },
+        "synapseDedicatedSQLPoolName":{
+          "value": "EnterpriseDW"
+        },
+        "synapseSQLPoolSKU":{
+          "value": "DW100c"
+        },
+        "collation":{
+          "value": "SQL_Latin1_General_CP1_CI_AS"
+        },
+        "synapseSparkPoolName": {
+          "value": "SparkPool"
+        },
+        "synapseSparkPoolNodeSize":{
+          "value": "Small"
+        },
+        "synapseSparkPoolMinNodeCount":{
+          "value": 3
+        },
+        "synapseSparkPoolMaxNodeCount":{
+          "value": 3
+        },
         "spObjectId":{
-          "value": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" //Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role (Owner) to deploy the solution)
+          "value": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" //Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role to deploy the solution)
         }
     }
 }
