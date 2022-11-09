@@ -2,7 +2,7 @@
       Module Steps 
       1 - Deploy Storage Account
       2 - Create your default/root folder structure
-      3 - Create a container called fasthack-synapse in the root
+      3 - Create a container called ftatoolkit-synapse in the root
       4 - Create another container called bronze in the root
       5 - Create another container called silver in the root
       6 - Create another container called gold in the root
@@ -80,7 +80,7 @@ resource storageAccount_default 'Microsoft.Storage/storageAccounts/blobServices@
   }
 }
 
-//3. Create a container called fasthack-synapse in the root
+//3. Create a container called ftatoolkit-synapse in the root
 resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@2021-09-01' = {
   name: '${storageAccount_resource.name}/default/${storageAccountContainer}'
   properties: {

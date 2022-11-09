@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "prefix": {
-            "value": "fasthack" // This value must be provided.
+            "value": "ftatoolkit" // This value must be provided.
         },
         "resourceLocation": {
             "value": "eastus" // This value must be provided.
@@ -12,7 +12,7 @@
           "value": "Standard_LRS"
         },
         "synapseManagedResourceGroup": {
-          "value": "P2-FastHackOnSynapse-Managed-RG"
+          "value": "P2-AnalyticsFundamentals-Managed-RG"
         },
         "ipaddress": {
             "value": "xx.xxx.xxx.xx" //This is your local IP address that will allow you to see into your workspace

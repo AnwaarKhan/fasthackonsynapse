@@ -6,27 +6,27 @@
                 {
                     "name": "nyc_tlc_yellow",
                     "interface": "powershell",
-                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/synapsepoc/linkedService/nyc_tlc_yellow.json",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/FTAToolkitArtifacts/main/Sample/synapsepoc/linkedService/nyc_tlc_yellow.json",
                     "tokens": []
                 },
                 {
                     "name": "HttpServerTripDataLinkedService",
-                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/synapsepoc/linkedService/HttpServerTripDataLinkedService.json",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/FTAToolkitArtifacts/main/Sample/synapsepoc/linkedService/HttpServerTripDataLinkedService.json",
                     "tokens": []
                 },
                 {
                     "name": "HttpServerTripFareDataLinkedService",
-                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/synapsepoc/linkedService/HttpServerTripFareDataLinkedService.json",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/FTAToolkitArtifacts/main/Sample/synapsepoc/linkedService/HttpServerTripFareDataLinkedService.json",
                     "tokens": []
                 },
                 {
                     "name": "keyVaultLinkedservice",
-                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/synapsepoc/linkedService/keyVaultLinkedservice.json",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/FTAToolkitArtifacts/main/Sample/synapsepoc/linkedService/keyVaultLinkedservice.json",
                     "tokens": []
                 },
                 {
                     "name": "TripFaresDataLakeStorageLinkedService",
-                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/synapsepoc/linkedService/TripFaresDataLakeStorageLinkedService.json",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/FTAToolkitArtifacts/main/Sample/synapsepoc/linkedService/TripFaresDataLakeStorageLinkedService.json",
                     "tokens": []
                 }
             ],
@@ -166,7 +166,7 @@
             "pipelines": [
                 {
                     "name": "TripFaresDataPipeline",
-                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/synapsepoc/pipeline/TripFaresDataPipeline-CSV-to-ADLS.json",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/FTAToolkitArtifacts/main/Sample/synapsepoc/pipeline/TripFaresDataPipeline-CSV-to-ADLS.json",
                     "tokens": []
                 }
             ]

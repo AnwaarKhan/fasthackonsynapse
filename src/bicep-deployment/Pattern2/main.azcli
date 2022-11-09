@@ -4,8 +4,8 @@
     $appID             = "YOUR-ServicePrincipal-ClientID"
     $password          = "YOUR-ServicePrincipal-CLIENTSECRET"
     $location          = "eastus"
-    $rgName            = "P2-FastHackOnSynapse-RG"
-    $DeploymentName    = "FastHackOnSynapse"
+    $rgName            = "P2-AnalyticsFundamentals-RG"
+    $DeploymentName    = "AnalyticsFundamentals"
     $BicepFile         = "main.bicep"
     $parameterFile     = "main.parameters.json" 
 #endregion
@@ -28,3 +28,8 @@ az deployment group create --resource-group $rgName --template-file $BicepFile -
 
 #5. Decompile ARM template
 #az bicep decompile --file template.json
+
+#Note - RUN THE FOLLOWING AZURE CLI COMMAND. You are going to need to GET your Service Principal ID If you run the deployment with Azure DevOps. 
+#The service principal ID is different. You can get your Service Principal Application ID and Service Principal Object ID from the Portal but not the ID. 
+#So you need to get your Service Principal ID if you run the deployment through Azure DevOps
+#az ad sp show --id <YourServicePrincipalAppID>

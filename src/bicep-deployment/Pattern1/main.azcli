@@ -4,8 +4,8 @@
     $appID             = "YOUR-ServicePrincipal-ClientID"
     $password          = "YOUR-ServicePrincipal-CLIENTSECRET"
     $location          = "eastus"
-    $rgName            = "P1-FastHackOnSynapse-RG"
-    $DeploymentName    = "FastHackOnSynapse"
+    $rgName            = "P1-AnalyticsFundamentals-RG"
+    $DeploymentName    = "AnalyticsFundamentals"
     $BicepFile         = "main.bicep"
     $parameterFile     = "main.parameters.json" 
 #endregion

@@ -36,7 +36,7 @@ param ctrlDeploySampleArtifacts bool = true         //Controls the creation of s
 param utcValue string = utcNow()
 
 @description('Unique Prefix')
-param prefix string = 'fasthack'
+param prefix string = 'ftatoolkit'
 
 @description('Unique Suffix')
 //param uniqueSuffix string = substring(uniqueString(resourceGroup().id),0,3)
@@ -60,8 +60,8 @@ param networkIsolationMode string = 'default'
 param env string = 'Dev'
 
 param tags object = {
-  Owner: 'fasthack'
-  Project: 'fasthack'
+  Owner: 'ftatoolkit'
+  Project: 'ftatoolkit'
   Environment: env
   Toolkit: 'bicep'
   Name: prefix
@@ -138,7 +138,7 @@ module m_sqlsvr 'modules/deploy_3_sqlserver.bicep' = {
     tags: tags
     administratorLogin: sqlAdministratorLogin
     administratorLoginPassword: sqlAdministratorLoginPassword
-    databaseName: 'fasthacksampledb'
+    databaseName: 'ftatoolkitsampledb'
   }
 }
 
@@ -225,10 +225,10 @@ module m_RBACRoleAssignment 'modules/deploy_6_RBAC.bicep' = {
 //********************************************************
 // Post Deployment Scripts
 //********************************************************
-var synapseWorkspaceParams = '-SynapseWorkspaceName ${synapseWorkspaceName} -SynapseWorkspaceID ${m_synapse.outputs.synapseWorkspaceID}' //(i.e. -SynapseWorkspaceName fasthack-synapse-xxx -SynapseWorkspaceID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-FastHackOnSynapse-RG/providers/Microsoft.Synapse/workspaces/fasthack-synapse-xxx)
-var datalakeAccountSynapseParams = '-DataLakeAccountName ${storageAccountName} -DataLakeAccountResourceID ${m_storage.outputs.storageAccounResourceId}' //(i.e. -DataLakeAccountName fasthackadlsxxx -DataLakeAccountResourceID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-FastHackOnSynapse-RG/providers/Microsoft.Storage/storageAccounts/fasthackadlsxxx)
-var keyVaultParams = '-KeyVaultName ${keyVaultName} -KeyVaultID ${m_keyvault.outputs.keyVaultID}' //(i.e. -KeyVaultName fasthack-keyvault-xxx -KeyVaultID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-FastHackOnSynapse-RG/providers/Microsoft.KeyVault/vaults/fasthack-keyvault-xxx)
-var sqlParams = '-AzureSQLServerName ${m_sqlsvr.outputs.sqlServerName}' //(i.e. -AzureSQLServerName fasthack-sql-xxx)
+var synapseWorkspaceParams = '-SynapseWorkspaceName ${synapseWorkspaceName} -SynapseWorkspaceID ${m_synapse.outputs.synapseWorkspaceID}' //(i.e. -SynapseWorkspaceName ftatoolkit-synapse-xxx -SynapseWorkspaceID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-AnalyticsFundamentals-RG/providers/Microsoft.Synapse/workspaces/ftatoolkit-synapse-xxx)
+var datalakeAccountSynapseParams = '-DataLakeAccountName ${storageAccountName} -DataLakeAccountResourceID ${m_storage.outputs.storageAccounResourceId}' //(i.e. -DataLakeAccountName ftatoolkitadlsxxx -DataLakeAccountResourceID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-AnalyticsFundamentals-RG/providers/Microsoft.Storage/storageAccounts/ftatoolkitadlsxxx)
+var keyVaultParams = '-KeyVaultName ${keyVaultName} -KeyVaultID ${m_keyvault.outputs.keyVaultID}' //(i.e. -KeyVaultName ftatoolkit-keyvault-xxx -KeyVaultID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-AnalyticsFundamentals-RG/providers/Microsoft.KeyVault/vaults/ftatoolkit-keyvault-xxx)
+var sqlParams = '-AzureSQLServerName ${m_sqlsvr.outputs.sqlServerName}' //(i.e. -AzureSQLServerName ftatoolkit-sql-xxx)
 var uamiParams = '-UAMIPrincipalID ${m_keyvault.outputs.deploymentScriptUAMIPrincipalId}' //(i.e. -UAMIPrincipalID xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
 
 var sampleArtifactsParams = ctrlDeploySampleArtifacts ? '-CtrlDeploySampleArtifacts $True -SampleArtifactCollectioName ${sampleArtifactCollectionName}' : ''

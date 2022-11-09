@@ -1,6 +1,6 @@
-![Synapse FastHack CI/CD](/Assets/images/synapsecicd.png)
+![FTA Analytics-in-a-Box: Bicep and CI/CD](/Assets/images/ftaanalyticsinaboxcicd.png)
 
-## <img src ='https://airsblobstorage.blob.core.windows.net/airstream/bicep.png' alt="Fast Hack Bicep Deployment" width="50px" style="float: left; margin-right:10px;"> Bicep Deployment (Azure Synapse Analytics workspace)
+## <img src ='https://airsblobstorage.blob.core.windows.net/airstream/bicep.png' alt="FTA Analytics-in-a-Box: Bicep Deployment" width="50px" style="float: left; margin-right:10px;"> Bicep Deployment (Azure Synapse Analytics workspace)
 
 ### Preparation
 1. Install az cli  
@@ -31,7 +31,7 @@ Install-Module -Name Az.Synapse
             "value": "eastus" // This value must be provided.
         },
         "synapseManagedResourceGroup": {
-          "value": "A-FastHackOnSynapse-Managed-RG"
+          "value": "P1-AnalyticsFundamentals-Managed-RG"
         },
         "ipaddress": {
             "value": "xxx.xxx.xxx.xxx"
@@ -101,7 +101,7 @@ $rgName    = "FastHackOnSynapse-RG"
 $location = "eastus"
 ```
 
-2. Go to STEP2 (Azure CLI or PowerShell)
+2. Go to STEP 2 (Azure CLI or PowerShell)
 ### STEP 2 (PowerShell)
 1. Azure Login
 ```

@@ -1,14 +1,14 @@
 ﻿<#
  .NOTES
         =========================================================================================================
-        Created by:       Author: Fast Track - Synapse Fast Hack Team
+        Created by:       Author: Analytics Fundamentals - FTA Toolkit Team
         Created on:       09/13/2022
         =========================================================================================================
 
  .DESCRIPTION
         You can run the script one of two ways:
         1. Using Inline Parameters
-                .\SynapseDeployArtifacts.ps1 -SubscriptionID xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx -ResourceGroupName P1-FastHackOnSynapse-RG -ResourceGroupLocation eastus -KeyVaultName fasthack-keyvault-xxx -KeyVaultID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-FastHackOnSynapse-RG/providers/Microsoft.KeyVault/vaults/fasthack-keyvault-xxx -SynapseWorkspaceName fasthack-synapse-xxx -SynapseWorkspaceID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-FastHackOnSynapse-RG/providers/Microsoft.Synapse/workspaces/fasthack-synapse-xxx -DataLakeAccountName fasthackadlsxxx -DataLakeAccountResourceID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-FastHackOnSynapse-RG/providers/Microsoft.Storage/storageAccounts/fasthackadlsxxx -AzureSQLServerName fasthack-sql-xxx -UAMIPrincipalID xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx -CtrlDeploySampleArtifacts $True -SampleArtifactCollectioName OpenDatasets
+                .\SynapseDeployArtifacts.ps1 -SubscriptionID xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx -ResourceGroupName P1-AnalyticsFundamentals-RG -ResourceGroupLocation eastus -KeyVaultName ftatoolkit-keyvault-xxx -KeyVaultID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-AnalyticsFundamentals-RG/providers/Microsoft.KeyVault/vaults/ftatoolkit-keyvault-xxx -SynapseWorkspaceName ftatoolkit-synapse-xxx -SynapseWorkspaceID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-AnalyticsFundamentals-RG/providers/Microsoft.Synapse/workspaces/ftatoolkit-synapse-xxx -DataLakeAccountName ftatoolkitadlsxxx -DataLakeAccountResourceID /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/P1-AnalyticsFundamentals-RG/providers/Microsoft.Storage/storageAccounts/ftatoolkitadlsxxx -AzureSQLServerName ftatoolkit-sql-xxx -UAMIPrincipalID xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx -CtrlDeploySampleArtifacts $True -SampleArtifactCollectioName OpenDatasets
 #>
 
 #---------------------------------------------------------[Parameters]-----------------------------------------------------
@@ -139,7 +139,7 @@ function Save-SynapseSampleArtifacts{
   $headers = @{ Authorization = "Bearer $token" }
 
   $synapseTokens = @{"`#`#azsynapsewks`#`#" = $SynapseWorkspaceName; }
-  $indexFileUrl = "https://raw.githubusercontent.com/AndresPad/fasthackartifacts/main/Sample/index.json"
+  $indexFileUrl = "https://raw.githubusercontent.com/AndresPad/FTAToolkitArtifacts/main/Sample/index.json"
   #$indexFileUrl = "index.json"
   #$sampleCodeIndex = Get-Content -Raw -Path index.json | ConvertFrom-Json
   $sampleCodeIndex = Invoke-WebRequest $indexFileUrl | ConvertFrom-Json
@@ -317,7 +317,7 @@ $secondsDelay = 60
 #---------------------------------------------------------[Entry Point - Execution of Script Starts Here]-----------------------------------------------------
 #region Entry Point - MAIN SCRIPT BODY
 Write-Host "#--------------------------------------------------------------------------------------------------------";
-    Write-Host "  Synapse Fast Hack - Analytics Workspace Artifacts Creation" -ForegroundColor Gray
+    Write-Host "  Analytics Fundamentals - Synapse Analytics Workspace Artifacts Creation" -ForegroundColor Gray
     Write-Output "  Display Params"
 
     $output = 'Your Params {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}' -f $SubscriptionID, $ResourceGroupName, $ResourceGroupLocation, $SynapseWorkspaceName, $SynapseWorkspaceID, $DataLakeAccountName, $DataLakeAccountResourceID, $KeyVaultName, $KeyVaultID, $AzureSQLServerName, $UAMIPrincipalID
