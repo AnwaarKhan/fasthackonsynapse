@@ -15,8 +15,7 @@ trigger:
 pool:
   vmImage: $(ap_vm_image)
 
-
-stages :
+stages:
   - stage: Lint
     displayName: Lint and Preflight check
     jobs:

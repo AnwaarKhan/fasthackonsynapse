@@ -1,0 +1,60 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+# https://4bes.nl/2021/04/18/step-by-step-deploy-bicep-with-azure-devops-pipelines/
+# https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/add-template-to-azure-pipelines?
+
+name: Bicep--AnalyticsFundamentals-Deploy
+trigger:
+- none
+
+variables:
+  resourceGroupName: 'P1-AnalyticsFundamentals-RG'
+  location: 'eastus'
+  azureSubscription: 'APOps-FastHacks'
+  resourcePrefix: 'ftatoolkit'
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+    - task: AzureCLI@2  
+      displayName: 'build bicep artifact' 
+      inputs: 
+        azureSubscription: $(azureSubscription) 
+        scriptType: 'pscore'  
+        scriptLocation: 'inlineScript'  
+        inlineScript: 'az bicep build --file ../src/bicep-deployment/Pattern1/main.bicep'  
+
+    - task: PublishBuildArtifacts@1 
+      displayName: 'Publish artifact in pipeline' 
+      inputs: 
+        PathtoPublish: '$(Build.SourcesDirectory)/src/bicep-deployment/main.json'  
+        ArtifactName: 'finishedTemplate'  
+        publishLocation: 'Container' 
+
+- stage: deploy
+  jobs:
+  - deployment: biceptoAzure
+    displayName: 'Deploy Bicep to Azure'
+    environment: 'AzureDeployment'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - task: AzureCLI@2
+            displayName: 'deploy bicep template'
+            inputs:
+              azureSubscription: $(azureSubscription) 
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az group create --name $(resourceGroupName) --location $(location)
+                az deployment group create  `
+                --template-file $(Build.SourcesDirectory)/src/bicep-deployment/main.bicep `
+                --parameters $(Build.SourcesDirectory)/src/bicep-deployment/main.parameters.json `
+                --resource-group $(resourceGroupName)
