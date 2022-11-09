@@ -61,8 +61,8 @@ stages:
               echo $(sqlAdministratorLogin)
               echo ${{ parameters.sqlAdministratorLoginPassword }}
               echo ${{ parameters.spObjectId }}
-              az deployment sub validate \
-                --name $(Build.DefinitionName) \
+              az deployment group validate \
+                --name $(Build.DefinitionName) \ 
+                --resource-group $(resourceGroupName) \
                 --template-file ./src/bicep-deployment/Pattern1/main.bicep \
-                --location $(resourceLocation) \
                 --parameters prefix=$(prefix) resourceLocation=$(resourceLocation) storageAccountType=$(storageAccountType) synapseManagedResourceGroup=$(synapseManagedResourceGroup) sqlAdministratorLogin=$(sqlAdministratorLogin) sqlAdministratorLoginPassword=${{ parameters.sqlAdministratorLoginPassword }} spObjectId=${{ parameters.spObjectId }}
