@@ -10,7 +10,7 @@ Getting up and running with Synapse can sometimes be a complex undertaking. Some
 | Neeraj Jhaveri | @neerajjhaveri | neeraj.jhaveri@microsoft.com | 
 | Andrés Padilla | @AndresPad | andres.padilla@microsoft.com | 
 | Kathryn Varrall | | kavarral@microsoft.com | 
-| Situmalli Chandra Mohan | | schandra@microsoft.com | 
+| Situmalli Chandra Mohan | @svchandramohan | schandra@microsoft.com | 
 
 ## Architecture
 

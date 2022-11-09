@@ -1,7 +1,6 @@
-![FTA Analytics-in-a-Box: Bicep and CI/CD](/Assets/images/ftaanalyticsinaboxcicd.png)
+## <img src ='https://airsblobstorage.blob.core.windows.net/airstream/bicep.png' alt="FTA Analytics-in-a-Box: Bicep Deployment" width="50px" style="float: left; margin-right:10px;"> Pattern 1: Bicep Deployment (Azure Synapse Analytics workspace)
 
-## <img src ='https://airsblobstorage.blob.core.windows.net/airstream/bicep.png' alt="FTA Analytics-in-a-Box: Bicep Deployment" width="50px" style="float: left; margin-right:10px;"> Bicep Deployment Preparation
-
+## <img src="../../Assets/images/pattern1-architecture.png" alt="FTA Analytics-in-a-Box: Pattern 1 Deployment" style="float: left; margin-right:10px;" />
 
 ### Preparation
 1. Install az cli  
@@ -17,10 +16,37 @@ Install-Module -Name Az.Synapse
 1. Edit parameter File
 - main.parameters.json</br>
   - required</br>
-  xxx.xxx.xxx.xxx -> Your IP Address.</br>
   Xx$$x0xx (sqlAdministratorLoginPassword) (At least 12 characters (uppercase, lowercase, and numbers)) </br>
   xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx -> Your Service Principal ID from Azure AD. Make sure your Service Principal has Ownership role on the subscription.
-
+```
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "value": "fasthack" // This value must be provided.
+        },
+        "location": {
+            "value": "eastus" // This value must be provided.
+        },
+        "storageAccountType":{
+            "value": "Standard_LRS"
+        },
+        "synapseManagedResourceGroup": {
+          "value": "P1-AnalyticsFundamentals-Managed-RG"
+        },
+        "sqlAdministratorLogin": {
+          "value" : "sqladminuser"
+        },
+        "sqlAdministratorLoginPassword": {
+          "value": "Xx$$x0xx"
+        },
+        "spObjectId":{
+          "value": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" //Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role (Owner) to deploy the solution)
+        }
+    }
+}
+```
 ### (Option)
 #### If you use powershell (or pwsh)
 1. Install Module Az or Update Module Az  (Az Version >= 5.8.0)

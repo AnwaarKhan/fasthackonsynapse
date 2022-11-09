@@ -3,10 +3,10 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "prefix": {
-            "value": "ftatoolkit" // This value must be provided.
+          "value": "ftatoolkit" // This value must be provided.
         },
         "resourceLocation": {
-            "value": "eastus" // This value must be provided.
+          "value": "eastus" // This value must be provided.
         },
         "storageAccountType":{
           "value": "Standard_LRS"
@@ -15,7 +15,7 @@
           "value": "P2-AnalyticsFundamentals-Managed-RG"
         },
         "ipaddress": {
-            "value": "xx.xxx.xxx.xx" //This is your local IP address that will allow you to see into your workspace
+          "value": "xx.xxx.xxx.xx" //This is your local IP address that will allow you to see into your workspace
         },
         "sqlAdministratorLogin": {
           "value" : "sqladminuser"
@@ -39,7 +39,7 @@
           "value": "Small"
         },
         "synapseSparkPoolMinNodeCount":{
-            "value": 3
+          "value": 3
         },
         "synapseSparkPoolMaxNodeCount":{
           "value": 3
