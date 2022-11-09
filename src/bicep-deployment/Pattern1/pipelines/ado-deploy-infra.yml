@@ -3,35 +3,66 @@
 # https://4bes.nl/2021/04/18/step-by-step-deploy-bicep-with-azure-devops-pipelines/
 # https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/add-template-to-azure-pipelines?
 
-name: Bicep--AnalyticsFundamentals-Deploy
+name: Pattern1-Deploy-AnalyticsFundamentals
 trigger:
 - none
 
+parameters:
+- name: sqlAdministratorLoginPassword
+  type: string
+- name: spObjectId
+  type: string  
+
 variables:
-  resourceGroupName: 'P1-AnalyticsFundamentals-RG'
-  location: 'eastus'
   azureSubscription: 'APOps-FastHacks'
-  resourcePrefix: 'ftatoolkit'
+  resourceGroupName: 'P1-AnalyticsFundamentals-RG'
+  prefix: 'ftatoolkit'
+  resourceLocation: 'eastus'
+  storageAccountType: 'Standard_LRS'
+  synapseManagedResourceGroup: 'P1-AnalyticsFundamentals-Managed-RG'
+  sqlAdministratorLogin: 'sqladminuser'
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: windows-2019
 
 stages:
-- stage: Build
-  jobs:
-  - job: Build
-    steps:
-    - task: AzureCLI@2  
-      displayName: 'build bicep artifact' 
-      inputs: 
-        azureSubscription: $(azureSubscription) 
-        scriptType: 'pscore'  
-        scriptLocation: 'inlineScript'  
-        inlineScript: 'az bicep build --file ../src/bicep-deployment/Pattern1/main.bicep'  
+  - stage: Lint
+    displayName: Lint and Preflight check
+    jobs:
+    - job: LintBicep
+      displayName: Lint Bicep Code
+      steps:
+        - checkout: self
+        - script: |
+            az bicep build --file ./src/bicep-deployment/Pattern1/main.bicep
+          name: LintBicepCode
+          displayName: Run Bicep Linter
 
-    - task: PublishBuildArtifacts@1 
-      displayName: 'Publish artifact in pipeline' 
-      inputs: 
-        PathtoPublish: '$(Build.SourcesDirectory)/src/bicep-deployment/main.json'  
-        ArtifactName: 'finishedTemplate'  
-        publishLocation: 'Container' 
+  - stage: PreflightValidation
+    jobs:
+    - job: ValidateBicepCode
+      displayName: Validate Bicep Code
+      steps:
+        - task: AzureCli@2
+          name: RunPreflightValidateion
+          displayName: Run Preflight Validation
+          inputs:
+            azureSubscription: $(azureSubscription)
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              echo "PreflightValidation..."
+              echo $(Build.DefinitionName)
+              echo $(resourceGroupName)
+              echo $(prefix)
+              echo $(resourceLocation)
+              echo $(storageAccountType)
+              echo $(synapseManagedResourceGroup)
+              echo $(sqlAdministratorLogin)
+              echo ${{ parameters.sqlAdministratorLoginPassword }}
+              echo ${{ parameters.spObjectId }}
+              az deployment validate \
+                --name $(Build.DefinitionName) \
+                --template-file ./src/bicep-deployment/Pattern1/main.bicep \
+                --location $(resourceLocation) \
+                --parameters prefix=$(prefix) resourceLocation=$(resourceLocation) storageAccountType=$(storageAccountType) synapseManagedResourceGroup=$(synapseManagedResourceGroup) sqlAdministratorLogin=$(sqlAdministratorLogin) sqlAdministratorLoginPassword=${{ parameters.sqlAdministratorLoginPassword }} spObjectId=${{ parameters.spObjectId }}

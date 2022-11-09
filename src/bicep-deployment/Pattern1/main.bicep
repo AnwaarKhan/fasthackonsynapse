@@ -23,7 +23,7 @@
       7 - Create Synapse Workspace Assets (Linkd Services, Datasets, Pipelines, Notebooks, Triggers, etc. )
 */
 
-//targetScope = 'subscription'
+targetScope = 'subscription'
 
 //********************************************************
 // Workload Deployment Control Parameters
