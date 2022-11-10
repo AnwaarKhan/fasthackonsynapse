@@ -14,7 +14,7 @@ parameters:
   type: string  
 
 variables:
-  azureSubscription: 'APOps-FastHacks' 
+  azureSubscription: 'APOps-SubscriptionCnx' 
   resourceGroupName: 'P1-AnalyticsFundamentals-RG'
   synapseManagedResourceGroup: 'P1-AnalyticsFundamentals-Managed-RG'
   prefix: 'ftatoolkit'
@@ -26,6 +26,18 @@ pool:
   vmImage: windows-2019
 
 stages:
+  - stage: CreateResourceGroup
+    jobs:
+    - job: Create Resource Group
+      steps:
+      - task: AzureCLI@2  
+        displayName: 'Create Resource Group' 
+        inputs: 
+          azureSubscription: $(azureSubscription) 
+          scriptType: 'pscore'  
+          scriptLocation: 'inlineScript'  
+          inlineScript: 'az group create --name $(resourceGroupName) --location $(resourceLocation)'  
+
   - stage: Lint
     displayName: Lint and Preflight check
     jobs:

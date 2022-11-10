@@ -110,3 +110,27 @@ az group create --name ${rgName} --location ${location} --verbose
 ```
 az deployment group create --resource-group ${rgName} --template-file ${BicepFile} --parameters ${parameterFile} --verbose
 ```
+
+## Azure DevOps Deployment Steps
+
+1. Fork the repo: https://github.com/Azure/fasthackonsynapse.git to your git repo
+2. Open and change the YAML Pipeline file: .\src\bicep-deployment\Pattern1\pipelines\ado-deploy-infra.yml
+```
+  azureSubscription: 'YOUR-AZURE-DEVOPS-SERVICE-CONNECTION' 
+  resourceGroupName: 'P1-AnalyticsFundamentals-RG'
+  synapseManagedResourceGroup: 'P1-AnalyticsFundamentals-Managed-RG'
+  prefix: 'ftatoolkit'
+  resourceLocation: 'eastus'
+  storageAccountType: 'Standard_LRS'
+  sqlAdministratorLogin: 'sqladminuser'
+```
+
+3. Create a Service Connection in Azure DevOps
+
+4. Create a YML Pipeline
+    1. Go to Pipelines and create new Pipeline
+    1. 
+
+## Post Deployment
+   1. Add your account as the synapse workspace admin. Otherwise, you will not be able to see the pipelines and the other components when you open the synapse workspace. Synapse workspace > Access Control -> add your logged in account as "Synapse Administrator"
+   2. Run the master pipleine from the Azure synapse pipeline. Provide the required parameter Date to current date "YYYY-MM-DD" format.
