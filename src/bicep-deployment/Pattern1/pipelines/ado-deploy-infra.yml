@@ -28,7 +28,7 @@ pool:
 stages:
   - stage: CreateResourceGroup
     jobs:
-    - job: Create Resource Group
+    - job: CreateResourceGroup
       steps:
       - task: AzureCLI@2  
         displayName: 'Create Resource Group' 
@@ -79,7 +79,7 @@ stages:
     displayName: Deploy Azure Resources
     jobs:
     - deployment: DevDeployBicep
-      displayName: Deploy Infra
+      displayName: Deploy Bicep-Infra
       pool:
         vmImage: windows-2019
       environment: dev

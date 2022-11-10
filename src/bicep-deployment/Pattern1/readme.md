@@ -129,7 +129,21 @@ az deployment group create --resource-group ${rgName} --template-file ${BicepFil
 
 4. Create a YML Pipeline
     1. Go to Pipelines and create new Pipeline
-    1. 
+    1. Select the YAML file located in /src/bicep-deployment/Pattern1/pipelines/ado-deploy.infra.yml
+    
+
+![Bicep and CI/CD](/Assets/images/devops1-serviceconnection.png)
+
+![Bicep and CI/CD](/Assets/images/devops2-serviceconnection.png)
+
+![Bicep and CI/CD](/Assets/images/devops3-pipeline.png)
+
+![Bicep and CI/CD](/Assets/images/devops4-pipeline.png)
+
+![Bicep and CI/CD](/Assets/images/devops5-pipeline.png)
+
+![Bicep and CI/CD](/Assets/images/devops6-pipeline.png)
+
 
 ## Post Deployment
    1. Add your account as the synapse workspace admin. Otherwise, you will not be able to see the pipelines and the other components when you open the synapse workspace. Synapse workspace > Access Control -> add your logged in account as "Synapse Administrator"
