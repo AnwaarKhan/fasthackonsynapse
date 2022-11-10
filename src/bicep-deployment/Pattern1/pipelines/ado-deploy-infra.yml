@@ -21,7 +21,7 @@ variables:
   storageAccountType: 'Standard_LRS'
   synapseManagedResourceGroup: 'P1-AnalyticsFundamentals-Managed-RG'
   sqlAdministratorLogin: 'sqladminuser'
-
+  
 pool:
   vmImage: windows-2019
 
@@ -53,6 +53,7 @@ stages:
             inlineScript: |
               echo "PreflightValidation..."
               echo $(Build.DefinitionName)
+              echo ${{ parameters.spObjectId }}
               echo $(resourceGroupName)
               echo $(prefix)
               echo $(resourceLocation)
@@ -60,9 +61,4 @@ stages:
               echo $(synapseManagedResourceGroup)
               echo $(sqlAdministratorLogin)
               echo ${{ parameters.sqlAdministratorLoginPassword }}
-              echo ${{ parameters.spObjectId }}
-              az deployment group validate \
-                --name $(Build.DefinitionName) \ 
-                --resource-group $(resourceGroupName) \
-                --template-file ./src/bicep-deployment/Pattern1/main.bicep \
-                --parameters prefix=$(prefix) resourceLocation=$(resourceLocation) storageAccountType=$(storageAccountType) synapseManagedResourceGroup=$(synapseManagedResourceGroup) sqlAdministratorLogin=$(sqlAdministratorLogin) sqlAdministratorLoginPassword=${{ parameters.sqlAdministratorLoginPassword }} spObjectId=${{ parameters.spObjectId }}
+              az deployment group validate --resource-group $(resourceGroupName) --template-file ./src/bicep-deployment/Pattern1/main.bicep --parameters prefix=$(prefix) resourceLocation=$(resourceLocation) storageAccountType=$(storageAccountType) synapseManagedResourceGroup=$(synapseManagedResourceGroup) sqlAdministratorLogin=$(sqlAdministratorLogin) sqlAdministratorLoginPassword=${{ parameters.sqlAdministratorLoginPassword }} spObjectId=${{ parameters.spObjectId }}
