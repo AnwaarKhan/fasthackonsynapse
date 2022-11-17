@@ -7,7 +7,6 @@ variables:
   prefix: fasthack 
   postfix: uc3
   environment: dev
-  objectID: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
 
   # Azure DevOps 
   ado_service_connection_rg: Azure-ARM-Dev-SAPA
