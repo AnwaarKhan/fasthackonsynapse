@@ -12,16 +12,16 @@
           "value": "Standard_LRS"
         },
         "synapseManagedResourceGroup": {
-          "value": "P1-AnalyticsFundamentals-Managed-RG"
+          "value": "SP1-AnalyticsFundamentals-Managed-RG"
         },
         "sqlAdministratorLogin": {
           "value" : "sqladminuser"
         },
         "sqlAdministratorLoginPassword": {
-          "value": "Xx$$x0xx"
+          "value": "D0nt#Share"
         },
         "spObjectId":{
-          "value": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" //Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role to deploy the solution)
+          "value": "bfb89611-c0c4-4d47-a934-dcd6a960b148" //Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role to deploy the solution)
         }
     }
 }

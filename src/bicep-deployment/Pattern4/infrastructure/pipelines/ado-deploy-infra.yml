@@ -4,6 +4,9 @@
 parameters:
 - name: sqlserveradminpassword
   type: string
+- name: objectIDofServicePrincipal
+  type: string
+
 
 variables:
     # 'develop' or feature branches: DEV environment
@@ -47,13 +50,12 @@ stages:
               echo $(prefix)
               echo $(postfix)
               echo $(enviornment)
-              echo $(objectID)
               echo ${{ parameters.sqlserveradminpassword }}
               az deployment sub validate \
                 --name $(Build.DefinitionName) \
                 --template-file ./src/bicep-deployment/Pattern4/infrastructure/main.bicep \
                 --location $(location) \
-                --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=$(objectID) sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }}
+                --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=${{ parameters.objectIDofServicePrincipal }} sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }}
 
   - stage: CheckOutBicepAndDeployAzureResources
     displayName: Deploy Azure Resources
@@ -81,7 +83,7 @@ stages:
                     --name $(Build.DefinitionName) \
                     --location $(location) \
                     --template-file ./src/bicep-deployment/Pattern4/infrastructure/main.bicep \
-                    --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=$(objectID) sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }}
+                    --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=${{ parameters.objectIDofServicePrincipal }} sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }}
 
             - task: AzurePowerShell@5
               displayName: 'Azure PowerShell script: Deploy SQL Metadata'
