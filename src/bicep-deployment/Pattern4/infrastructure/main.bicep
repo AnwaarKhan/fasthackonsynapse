@@ -30,7 +30,7 @@ param tags object = {
 }
 
 var baseName  = '${prefix}${postfix}${env}'
-var resourceGroupName = 'AP4-${baseName}-RG'
+var resourceGroupName = 'SP4-${baseName}-RG'
 var sqlServerName = '${prefix}-sql-${postfix}-${env}'
 var synapseWorkSpaceName = '${prefix}-synapse-${postfix}-${env}'
 var dataLakeg2SynapseName = '${prefix}adlssyn${postfix}${env}'
