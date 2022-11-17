@@ -16,7 +16,7 @@ variables:
 
   # IaC
   baseName: $(prefix)$(postfix)$(environment)
-  resourceGroupName: P3-$(baseName)-RG
+  resourceGroupName: P3-$(baseName)-RG #You also need to change the ResourceGroupname in main.bicep file
   dataLakeAccountName: $(prefix)adl$(postfix)$(environment)
   synapseWorkspace: $(prefix)-synapse-$(postfix)$(environment)
   synapsedatalakegen2name: $(prefix)adlssyn$(postfix)$(environment)

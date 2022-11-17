@@ -14,7 +14,7 @@ variables:
 
   # IaC
   baseName: $(prefix)$(postfix)$(environment)
-  resourceGroupName: SP4-$(baseName)-RG
+  resourceGroupName: P4-$(baseName)-RG #You also need to change the ResourceGroupname in main.bicep file
   storageAccountName: $(prefix)st$(postfix)$(environment)
   dataLakeAccountName: $(prefix)adl$(postfix)$(environment)
   sqlServerName: $(prefix)-sql-$(postfix)-$(environment)
