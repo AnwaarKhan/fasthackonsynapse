@@ -5,7 +5,7 @@ variables:
 
   location: eastus 
   prefix: fasthack 
-  postfix: uc3
+  postfix: uc25
   environment: dev
 
   # Azure DevOps 
@@ -14,7 +14,7 @@ variables:
 
   # IaC
   baseName: $(prefix)$(postfix)$(environment)
-  resourceGroupName: AP4-$(baseName)-RG
+  resourceGroupName: SP4-$(baseName)-RG
   storageAccountName: $(prefix)st$(postfix)$(environment)
   dataLakeAccountName: $(prefix)adl$(postfix)$(environment)
   sqlServerName: $(prefix)-sql-$(postfix)-$(environment)

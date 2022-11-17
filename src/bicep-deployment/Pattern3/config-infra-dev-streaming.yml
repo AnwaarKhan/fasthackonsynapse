@@ -5,7 +5,7 @@ variables:
   ap_vm_image_ubuntu: ubuntu-latest
   location: eastus 
   prefix: fasthack 
-  postfix: pt35
+  postfix: uc35
   environment: dev
 
 
